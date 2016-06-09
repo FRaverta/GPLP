@@ -7,7 +7,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 
-import gui.MainWindow;
 import gui.NewWindow;
 import lpsolve.LpSolveException;
 
