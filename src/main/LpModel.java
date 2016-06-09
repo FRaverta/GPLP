@@ -9,9 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import org.jgrapht.DirectedGraph;
 import org.jgrapht.GraphPath;
-import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.GraphPathImpl;
 import org.jgrapht.graph.ListenableDirectedWeightedGraph;
 import org.jgrapht.alg.AllDirectedPaths;
@@ -56,7 +54,7 @@ public class LpModel{
 
 
 	private LpModel(
-			int AMOUNT_OF_VERTEX, int AMOUNT_OF_PATH,int MAX_WEIGHT_EDGE, 
+			double SHARED_EDGE_PONDERATION, boolean STRONG_SHARED_EDGE, int AMOUNT_OF_VERTEX, int AMOUNT_OF_PATH,int MAX_WEIGHT_EDGE, 
 			int EDGE_DENSITY,ListenableDirectedWeightedGraph<Vertex,Edge> graph, 
 			Vertex[] vertexs, Edge[] edges) throws IOException, LpSolveException
 	{
@@ -68,7 +66,7 @@ public class LpModel{
 		this.vertexs          = vertexs;
 		this.edges            = edges;
 		
-		 Pair<Integer,ListenableDirectedWeightedGraph<Vertex,Edge>> solution = solve();
+		 Pair<Integer,ListenableDirectedWeightedGraph<Vertex,Edge>> solution = solve(SHARED_EDGE_PONDERATION,STRONG_SHARED_EDGE);
 		 this.resultGraph = solution.b;		 
 		 this.graphMetrics =  new Metrics(graph, vertexs[0], vertexs[this.AMOUNT_OF_VERTEX-1]);
 		 this.resultMetrics = new Metrics(resultGraph, vertexs[0], vertexs[this.AMOUNT_OF_VERTEX-1]);
@@ -85,7 +83,7 @@ public class LpModel{
 	public static LpModel DefaultLPModel() throws IOException, LpSolveException
 	{
 		LpModel lpModel = new LpModel(
-										Parameters.AMOUNT_OF_NODES, Parameters.AMOUNT_OF_REQUIRED_PATHS,
+										Parameters.SHARED_EDGE_PONDERATION,false,Parameters.AMOUNT_OF_NODES, Parameters.AMOUNT_OF_REQUIRED_PATHS,
 				  						Parameters.MAX_WEIGHT_EDGE, Parameters.EDGE_DENSITY, Parameters.DEFAULT_GRAPH, 
 				  						Parameters.Vertexs, Parameters.Edges);		
 		return lpModel;
@@ -97,12 +95,12 @@ public class LpModel{
 	 * 
 	 * */
 	public static LpModel LpModelFromGraph(
-											int AMOUNT_OF_VERTEX, int AMOUNT_OF_PATH,int MAX_WEIGHT_EDGE, 
+											double SHARED_EDGE_PONDERATION,boolean STRONG_SHARED_EDGE ,int AMOUNT_OF_VERTEX, int AMOUNT_OF_PATH,int MAX_WEIGHT_EDGE, 
 											int EDGE_DENSITY,ListenableDirectedWeightedGraph<Vertex,Edge> graph, 
 											Vertex[] vertexs, Edge[] edges) 
 											throws IOException, LpSolveException
 	{
-		LpModel lpModel = new LpModel(AMOUNT_OF_VERTEX, AMOUNT_OF_PATH,
+		LpModel lpModel = new LpModel(SHARED_EDGE_PONDERATION, STRONG_SHARED_EDGE, AMOUNT_OF_VERTEX, AMOUNT_OF_PATH,
 									  MAX_WEIGHT_EDGE, EDGE_DENSITY, graph, 
 									  vertexs, edges);	
 		
@@ -123,7 +121,7 @@ public class LpModel{
 		vertexs = listVertexs.toArray(vertexs);
 		edges = listEdges.toArray(edges);
 		
-		LpModel model = new LpModel(amount_of_vertex, amount_of_path, max_weight_edge, edge_density, graph, vertexs, edges);
+		LpModel model = new LpModel(0,false,amount_of_vertex, amount_of_path, max_weight_edge, edge_density, graph, vertexs, edges);
 		return model;
 	}
 	
@@ -185,7 +183,7 @@ public class LpModel{
 	 * Solve current Linnear Programming model. 
 	 * 
 	 * */
-	private Pair<Integer,ListenableDirectedWeightedGraph<Vertex,Edge>> solve() throws IOException, LpSolveException{
+	private Pair<Integer,ListenableDirectedWeightedGraph<Vertex,Edge>> solve(double SHARED_EDGE_PONDERATION, boolean STRONG_SHARED_EDGE) throws IOException, LpSolveException{
 		Parameters.report.writeln("Creating LP Model\n. . .");
 		
 		String prefix = "lpmodel";
@@ -195,7 +193,7 @@ public class LpModel{
 	    tempFile.deleteOnExit();
 	    
 	    FileWriter writer = new FileWriter(tempFile);
-	    String stringLpModel = generateLPFormatString();
+	    String stringLpModel = generateLPFormatString(SHARED_EDGE_PONDERATION,STRONG_SHARED_EDGE);
 	    writer.append(stringLpModel);
 	    
 		Parameters.report.writeln("The LP model has been created: ");
@@ -210,6 +208,7 @@ public class LpModel{
 	    //Solve lp model	
     	LpSolve solver = LpSolve.readLp(tempFile.getCanonicalFile().getAbsolutePath(),1,"");
     	int solverResult = solver.solve();
+    	System.out.println("Solver Result= " + solverResult ) ;
 
 	      
 	      ListenableDirectedWeightedGraph<Vertex,Edge> resultGraph = generateGraphFromSolution(solver.getPtrVariables());
@@ -230,7 +229,7 @@ public class LpModel{
 	      return new Pair<Integer,ListenableDirectedWeightedGraph<Vertex,Edge>>(solverResult,resultGraph);
 	}
 	 
-	public String generateLPFormatString(){
+	public String generateLPFormatString(double shared_edge_ponderation, boolean strong_weighting){
 		//look for all simple path between node 0 and node 3
 		List<GraphPath<Vertex,Edge>> paths = getAllSinglePath(graph, vertexs[0],vertexs[vertexs.length - 1 ]);
 
@@ -240,22 +239,87 @@ public class LpModel{
 		//plus between all enables edges and its cost
 		for(int i=0; i<edges.length;i++)
 			st.append(" +" + graph.getEdgeWeight(edges[i]) +" E"+i );
+		
+//		if(shared_edge_ponderation > 0){			
+//			for(int i=0;i<edges.length;i++){
+//				st.append(" -"+ shared_edge_ponderation + " E"+i);
+//			}
+//		}
+//		st.append(";\n");
+//		if(shared_edge_ponderation > 0){			
+//			for(int i=0;i<edges.length;i++){
+//				boolean b = false;
+//				for(int j=0; j<paths.size();j++){
+//					if(paths.get(j).getEdgeList().contains(edges[i])){
+//						st.append(" +" + shared_edge_ponderation+ " E" + i + " P" + j);
+//						b=true;					
+//					}
+//					
+//				}
+//				
+////				if(b){st.append(" -" + "E" + i + " " + shared_edge_ponderation);}				
+//			}
+//		}
+		
+		/*
+		 * weak weigthting: add terms to lp's target function for each edge like this: shared_edge_ponderation * Ei. 
+		 */
+		if(shared_edge_ponderation > 0 && !strong_weighting){
+			System.out.println(shared_edge_ponderation);
+			for(int i=0;i<edges.length;i++)
+				st.append(" -" + shared_edge_ponderation+ " E" + i);
+		}
+
+		/* 
+		 * strong weigthting: For each two path pi and pj where pi!=pj,
+		 * add variables to lp model pipj which meaning is path pi and pj are both available. 
+		 * And add for each of theses new variables terms like shared_edge_ponderation * ShE(pi,pj) * pipj, 
+		 * where ShE(pi,pj) is the function that compute the shared edges between two paths.   
+		 */
+		if(shared_edge_ponderation > 0 && strong_weighting){
+			for(int i=0; i<paths.size(); i++)
+				for(int j=i+1; j<paths.size(); j++){
+					int sharedEdge = amountSE(paths.get(i), paths.get(j));
+					if( sharedEdge > 0)
+						st.append(" +" + (shared_edge_ponderation * sharedEdge) + " P" + i + "P" + j);
+				}
+					
+		}
+
+		
+		
 		st.append(";\n");
 		
+		int constraintNumber=1;
+		
 		//amount of path constraint
-		st.append("r_1:");
+		st.append("r_" + constraintNumber + ":"); constraintNumber++;
 		for(int i=0; i<paths.size();i++)
 			st.append(" +P"+i);
 		st.append(" >= " + AMOUNT_OF_PATH + ";\n");
 		
 		//constraint about each path
 		for(int i=0;i<paths.size();i++){
-			st.append("r_"+ (i+2) +":");
+			st.append("r_"+ constraintNumber + ":"); constraintNumber++;
 			st.append("+" + paths.get(i).getEdgeList().size() + " P"+ i + " <=");
 			for(int j=0; j<paths.get(i).getEdgeList().size(); j++)
 				st.append(" +" + paths.get(i).getEdgeList().get(j).name);
 			st.append(";\n");
 		}
+		
+		
+		//constraint about strong shared edges 
+		if(strong_weighting)
+			for(int i=0; i<paths.size(); i++)
+				for(int j=i+1; j<paths.size(); j++){
+					int sharedEdge = amountSE(paths.get(i), paths.get(j));
+					if( sharedEdge > 0){		
+						st.append("r_"+ constraintNumber +":"); constraintNumber++;
+						st.append(" P" + i + " " + "+" + "P" + j + " <= +1 +P" + i + "P" + j + ";\n" );
+				
+					}
+				}
+		
 		st.append("\n");
 		
 		//constraint that all variables are boolean.				
@@ -265,7 +329,13 @@ public class LpModel{
 
 		for(int i=0; i<graph.edgeSet().size();i++)
 			st.append(" E" + i + ",");
-		st.deleteCharAt(st.length()-1);
+		
+		if(strong_weighting)
+			for(int i=0; i<paths.size(); i++)
+				for(int j=i+1; j<paths.size(); j++)
+					st.append(" P" + i + "P" + j + ",");
+		
+		st.deleteCharAt(st.length()-1);		
 		st.append(";");
 		
 		System.out.println(st.toString());
@@ -287,9 +357,18 @@ public class LpModel{
 	}
 	
 	public static LpModel testLpModel(ListenableDirectedWeightedGraph<Vertex,Edge> graph, int amount_of_path,Vertex[] vertexs, Edge[] edges) throws IOException, LpSolveException{
-		return new LpModel(graph.vertexSet().size(), amount_of_path, Integer.MAX_VALUE, 100, graph, vertexs,edges);
+		return new LpModel(0,false,graph.vertexSet().size(), amount_of_path, Integer.MAX_VALUE, 100, graph, vertexs,edges);
 	}
 	
+	private static int amountSE(GraphPath<Vertex,Edge> pi, GraphPath<Vertex,Edge> pj){
+		int result = 0;
+		for(Edge ePi: pi.getEdgeList() )
+			for(Edge ePj: pj.getEdgeList())
+				if(ePi.equals(ePj))
+					result++;
+
+		return result;
+	}
 //	public static void main(String[] args) throws IOException{
 //		LpModel model = new LpModel();
 //				

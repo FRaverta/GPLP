@@ -18,7 +18,7 @@ public class Metrics {
 	 * eg. 3 path from source to target(see A,B,C) 
 	 * If A shared 1 edge with B and 2 edges with C
 	 * and B shared 1 edge with C so
-	 * shared_edges_average= 4/3
+	 * shared_edges_average= 4/cantidadAristas(A) + cantidadAristas(B) + cantidadAristas(C)
 	 * */
 	public final double shared_edges_average;
 	
@@ -144,7 +144,11 @@ public class Metrics {
 					if(p1.getEdgeList().contains(e)) shared++;
 					
 			}
-		shared = shared / this.amount_of_edges;
+		
+		int path_edges = 0;
+		for(GraphPath<Vertex, Edge> p: paths)
+			path_edges += p.getEdgeList().size();
+		shared = shared / path_edges;
 		return shared;
 	}
 
@@ -168,7 +172,7 @@ public class Metrics {
 		st.append("min_cost: " + min_cost + "\n");
 
 		st.append("Path availables after 1 failure in average " + paa1f + "\n");
-		st.append("Path availables after 1 failure in the worsest case " + paa1fwc + "\n");
+		st.append("Path availables after 1 failure in the worst case " + paa1fwc + "\n");
 		st.append("----------------------------------------------------------+\n");
 		
 		return st.toString();

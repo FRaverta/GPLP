@@ -68,10 +68,10 @@ public class Controller {
 		Controller c = new Controller();
 	}
 	
-	public void loadExample1(){	
+	public void loadExample1(boolean strongSharedEge, double sharedEdegeWeighing){	
 		try {
 			model = LpModel.LpModelFromGraph(
-											Parameters.E1_AMOUNT_OF_NODES, Parameters.E1_AMOUNT_OF_REQUIRED_PATHS,
+											sharedEdegeWeighing,strongSharedEge,Parameters.E1_AMOUNT_OF_NODES, Parameters.E1_AMOUNT_OF_REQUIRED_PATHS,
 											Parameters.E1_MAX_WEIGHT_EDGE, Parameters.E1_EDGE_DENSITY, Parameters.E1_GRAPH, 
 											Parameters.E1_Vertexs, Parameters.E1_Edges);
 			gui.setGraphs(model.graph,model.resultGraph);
@@ -83,15 +83,55 @@ public class Controller {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			Parameters.report.writeln(e.toString());
-		}	
+		}
+		finally{gui.activeMenu();}
 	}
 	
-	public void loadExample2(){	
+	public void loadExample2(boolean strongSharedEge, double sharedEdegeWeighing){	
 		try {
 			model = LpModel.LpModelFromGraph(
-											Parameters.E2_AMOUNT_OF_NODES, Parameters.E2_AMOUNT_OF_REQUIRED_PATHS,
+											sharedEdegeWeighing, strongSharedEge,Parameters.E2_AMOUNT_OF_NODES, Parameters.E2_AMOUNT_OF_REQUIRED_PATHS,
 											Parameters.E2_MAX_WEIGHT_EDGE, Parameters.E2_EDGE_DENSITY, Parameters.E2_GRAPH, 
 											Parameters.E2_Vertexs, Parameters.E2_Edges);
+			gui.setGraphs(model.graph,model.resultGraph);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+			Parameters.report.writeln(e.toString());
+		} catch (LpSolveException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			Parameters.report.writeln(e.toString());
+		}	
+		finally{gui.activeMenu();}
+	}
+	
+	public void loadExample3(boolean strongSharedEge, double sharedEdegeWeighing){	
+		try {
+			model = LpModel.LpModelFromGraph(
+											sharedEdegeWeighing, strongSharedEge,Parameters.E3_AMOUNT_OF_NODES, Parameters.E3_AMOUNT_OF_REQUIRED_PATHS,
+											Parameters.E3_MAX_WEIGHT_EDGE, Parameters.E3_EDGE_DENSITY, Parameters.E3_GRAPH, 
+											Parameters.E3_Vertexs, Parameters.E3_Edges);
+			gui.setGraphs(model.graph,model.resultGraph);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+			Parameters.report.writeln(e.toString());
+		} catch (LpSolveException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			Parameters.report.writeln(e.toString());
+		}	
+		finally{gui.activeMenu();}
+	}
+	
+	
+	public void loadDefault(boolean strongSharedEge, double sharedEdegeWeighing){	
+		try {
+			model = LpModel.LpModelFromGraph(
+											sharedEdegeWeighing, strongSharedEge,Parameters.AMOUNT_OF_NODES, Parameters.AMOUNT_OF_REQUIRED_PATHS,
+											Parameters.MAX_WEIGHT_EDGE, Parameters.EDGE_DENSITY, Parameters.DEFAULT_GRAPH, 
+											Parameters.Vertexs, Parameters.Edges);
 			gui.setGraphs(model.graph,model.resultGraph);
 
 		} catch (IOException e) {
@@ -102,7 +142,10 @@ public class Controller {
 			e.printStackTrace();
 			Parameters.report.writeln(e.toString());
 		}	
+		finally{gui.activeMenu();}
 	}
+	
+	
 	class GenerateLpModelTask implements Runnable{
 		int amount_of_vertex;
 		int edge_density;

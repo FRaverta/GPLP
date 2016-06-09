@@ -80,7 +80,7 @@ public class testLpModel extends TestCase {
 			assertEquals("Amount of edges error", lpModel.resultGraph.edgeSet().size(),6);
 			
 			//entry graph metrics test			
-			assertEquals("entry metrics- Amount of shared edges average error", 3.0 / 7.0, lpModel.graphMetrics.shared_edges_average);
+			assertEquals("entry metrics- Amount of shared edges average error", 3.0 / 10.0, lpModel.graphMetrics.shared_edges_average);
 			assertEquals("entry metrics- Cost average error", (12.0+12.0+15.0+16.0)/4.0, lpModel.graphMetrics.cost_average);
 			assertEquals("entry metrics- Min cost average error", 12.0, lpModel.graphMetrics.min_cost);
 			assertEquals("entry metrics- Max cost average error", 16.0, lpModel.graphMetrics.max_cost);
@@ -88,7 +88,7 @@ public class testLpModel extends TestCase {
 			assertEquals("entry metrics- Fault tolerance after one failure in the worst case.",2 ,lpModel.graphMetrics.paa1fwc);
 
 			//result metrics test
-			assertEquals("result metrics- Amount of shared edges average error", 3.0/6.0, lpModel.resultMetrics.shared_edges_average);
+			assertEquals("result metrics- Amount of shared edges average error", 3.0/9.0, lpModel.resultMetrics.shared_edges_average);
 			assertEquals("result metrics- Cost average error", (12.0+15.0+16.0)/3.0,lpModel.resultMetrics.cost_average);
 			assertEquals("result metrics- Min cost error",12.0, lpModel.resultMetrics.min_cost);
 			assertEquals("result metrics- Max cost error", 16.0, lpModel.resultMetrics.max_cost);

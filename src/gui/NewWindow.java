@@ -32,6 +32,7 @@ public class NewWindow {
 	private JGraphAdapterDemo  rightUpGraph,rightDownGraph;
 	protected JFrame frame;
 	private NewSampleWindow sampleWindow;
+	private StudyCasesWindow studyCasesWindow;
 	
 	/**
 	 * Launch the application.
@@ -91,28 +92,89 @@ public class NewWindow {
 				}
 			});
 		}
+		
 		{
 		//boton load tree topology
-		JMenuItem newItem = new JMenuItem("Load Tree Topology");
+		JMenuItem newItem = new JMenuItem("Run a study case");
 		menu.add(newItem);upPanel.add(menu);
 		newItem.addActionListener(new ActionListener(){
 				public void actionPerformed(ActionEvent e){				
-					controller.loadExample1();
-					
+					studyCasesWindow.setVisible(true);					
 				}
 			});
 		}
-		{
-		//boton load tree topology
-		JMenuItem newItem = new JMenuItem("Load example 2");
-		menu.add(newItem);upPanel.add(menu);
-		newItem.addActionListener(new ActionListener(){
-				public void actionPerformed(ActionEvent e){				
-					controller.loadExample2();
-					
-				}
-			});
-		}
+		
+//		{
+//		//boton load tree topology
+//		JMenuItem newItem = new JMenuItem("Load Tree Topology");
+//		menu.add(newItem);upPanel.add(menu);
+//		newItem.addActionListener(new ActionListener(){
+//				public void actionPerformed(ActionEvent e){				
+//					controller.loadExample1(false);
+//					
+//				}
+//			});
+//		}
+//		{
+//		//boton load tree topology
+//		JMenuItem newItem = new JMenuItem("Load example 2");
+//		menu.add(newItem);upPanel.add(menu);
+//		newItem.addActionListener(new ActionListener(){
+//				public void actionPerformed(ActionEvent e){				
+//					controller.loadExample2(false);
+//					
+//				}
+//			});
+//		}
+//		
+//		{
+//		//boton load tree topology
+//		JMenuItem newItem = new JMenuItem("Load Tree Topology pse");
+//		menu.add(newItem);upPanel.add(menu);
+//		newItem.addActionListener(new ActionListener(){
+//				public void actionPerformed(ActionEvent e){				
+//					controller.loadExample1(true);
+//					
+//				}
+//			});
+//		}
+//		
+//		{
+//		//boton load tree topology
+//		JMenuItem newItem = new JMenuItem("Load example 2 pse");
+//		menu.add(newItem);upPanel.add(menu);
+//		newItem.addActionListener(new ActionListener(){
+//				public void actionPerformed(ActionEvent e){				
+//					controller.loadExample2(true);
+//					
+//				}
+//			});
+//		}
+//		
+//		{
+//		//boton load tree topology
+//		JMenuItem newItem = new JMenuItem("Load default example");
+//		menu.add(newItem);upPanel.add(menu);
+//		newItem.addActionListener(new ActionListener(){
+//				public void actionPerformed(ActionEvent e){				
+//					controller.loadDefault(false);
+//					
+//				}
+//			});
+//		}
+//		
+//		{
+//		//boton load tree topology
+//		JMenuItem newItem = new JMenuItem("Load default example pse");
+//		menu.add(newItem);upPanel.add(menu);
+//		newItem.addActionListener(new ActionListener(){
+//				public void actionPerformed(ActionEvent e){				
+//					controller.loadDefault(true);
+//					
+//				}
+//			});
+//		}
+		
 		
 		//leftPanel
 		ReportPanel  leftPanel = new ReportPanel();
@@ -170,6 +232,7 @@ public class NewWindow {
 		
 		//Jdialog
 		this.sampleWindow = new NewSampleWindow(this);
+		this.studyCasesWindow = new StudyCasesWindow(this);
 	}
 	
 	public void setGraphs(ListenableDirectedGraph graph_up,ListenableDirectedGraph graph_down){
@@ -214,10 +277,24 @@ public class NewWindow {
 		this.sampleWindow.setVisible(false);
 	}
 	
+	public void hideStudyCaseWindow() {
+		this.studyCasesWindow.setVisible(false);
+	}
+	
 	public void solveNewModel(int amount_of_vertex,int edge_density,int amount_of_path,int max_weight_edge){
 		sampleWindow.setVisible(false);
 		this.frame.getJMenuBar().getMenu(0).setEnabled(false);
 		controller.solveNewModel(amount_of_vertex, edge_density, amount_of_path, max_weight_edge);
+	}
+	
+	public void solveStudyCase(int studyCase,int sharedEdgeOption, double sharedEdegeWeighing){
+		studyCasesWindow.setVisible(false);
+		this.frame.getJMenuBar().getMenu(0).setEnabled(false);
+		switch (studyCase) {
+			case 0 : controller.loadDefault((sharedEdgeOption==2)?true:false,sharedEdegeWeighing); break;
+			case 1 : controller.loadExample1((sharedEdgeOption==2)?true:false,sharedEdegeWeighing); break;
+			case 2 : controller.loadExample3((sharedEdgeOption==2)?true:false,sharedEdegeWeighing); break;
+		}		
 	}
 	
 
