@@ -23,7 +23,8 @@ import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
-public class MainWindow {
+@Deprecated
+class MainWindow {
 
 	private JFrame frame;
 	private JTextField edges_density;
