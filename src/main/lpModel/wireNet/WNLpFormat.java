@@ -1,6 +1,9 @@
-package main;
+package main.lpModel.wireNet;
 import lpsolve.*;
-import util.Pair;
+import main.Parameters;
+import main.util.Edge;
+import main.util.Pair;
+import main.util.Vertex;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -16,9 +19,10 @@ import org.jgrapht.alg.AllDirectedPaths;
 
 /**
  * Represent an unmutable linnear programming model and its solution if it is feasible
+ * for a wire network.
  * 
  * */
-public class LpModel{
+public class WNLpFormat{
 	
 	private static final int MAX_ATTEMPT_RANDOM_GRAPH = 5000;
 
@@ -47,13 +51,13 @@ public class LpModel{
 	public final Edge[] edges;
 
 	/** The entry graph metrics */
-	public final Metrics graphMetrics;
+	public final WNMetrics graphMetrics;
 	
 	/** The result graph metrics */
-	public final Metrics resultMetrics;
+	public final WNMetrics resultMetrics;
 
 
-	private LpModel(
+	private WNLpFormat(
 			double SHARED_EDGE_PONDERATION, boolean STRONG_SHARED_EDGE, int AMOUNT_OF_VERTEX, int AMOUNT_OF_PATH,int MAX_WEIGHT_EDGE, 
 			int EDGE_DENSITY,ListenableDirectedWeightedGraph<Vertex,Edge> graph, 
 			Vertex[] vertexs, Edge[] edges) throws IOException, LpSolveException
@@ -68,8 +72,8 @@ public class LpModel{
 		
 		 Pair<Integer,ListenableDirectedWeightedGraph<Vertex,Edge>> solution = solve(SHARED_EDGE_PONDERATION,STRONG_SHARED_EDGE);
 		 this.resultGraph = solution.b;		 
-		 this.graphMetrics =  new Metrics(graph, vertexs[0], vertexs[this.AMOUNT_OF_VERTEX-1]);
-		 this.resultMetrics = new Metrics(resultGraph, vertexs[0], vertexs[this.AMOUNT_OF_VERTEX-1]);
+		 this.graphMetrics =  new WNMetrics(graph, vertexs[0], vertexs[this.AMOUNT_OF_VERTEX-1]);
+		 this.resultMetrics = new WNMetrics(resultGraph, vertexs[0], vertexs[this.AMOUNT_OF_VERTEX-1]);
 
 	}
 	
@@ -80,12 +84,17 @@ public class LpModel{
 	 * @throws LpSolveException 
 	 * 
 	 * */
-	public static LpModel DefaultLPModel() throws IOException, LpSolveException
+	public static WNLpFormat DefaultLPModel() throws IOException, LpSolveException
 	{
-		LpModel lpModel = new LpModel(
-										Parameters.SHARED_EDGE_PONDERATION,false,Parameters.AMOUNT_OF_NODES, Parameters.AMOUNT_OF_REQUIRED_PATHS,
-				  						Parameters.MAX_WEIGHT_EDGE, Parameters.EDGE_DENSITY, Parameters.DEFAULT_GRAPH, 
-				  						Parameters.Vertexs, Parameters.Edges);		
+//		WNLpFormat lpModel = new WNLpFormat(
+//										Parameters.SHARED_EDGE_PONDERATION,false,Parameters.AMOUNT_OF_NODES, Parameters.AMOUNT_OF_REQUIRED_PATHS,
+//				  						Parameters.MAX_WEIGHT_EDGE, Parameters.EDGE_DENSITY, Parameters.DEFAULT_GRAPH, 
+//				  						Parameters.Vertexs, Parameters.Edges);	
+		WNLpFormat lpModel = new WNLpFormat(
+				Parameters.SHARED_EDGE_PONDERATION,false,Parameters.AMOUNT_OF_NODES, Parameters.AMOUNT_OF_REQUIRED_PATHS,
+					Parameters.MAX_WEIGHT_EDGE, Parameters.EDGE_DENSITY, Parameters.DEFAULT_GRAPH, 
+					Parameters.Vertexs, Parameters.Edges);		
+
 		return lpModel;
 	}
 	
@@ -94,20 +103,20 @@ public class LpModel{
 	 * @throws LpSolveException 
 	 * 
 	 * */
-	public static LpModel LpModelFromGraph(
+	public static WNLpFormat LpModelFromGraph(
 											double SHARED_EDGE_PONDERATION,boolean STRONG_SHARED_EDGE ,int AMOUNT_OF_VERTEX, int AMOUNT_OF_PATH,int MAX_WEIGHT_EDGE, 
 											int EDGE_DENSITY,ListenableDirectedWeightedGraph<Vertex,Edge> graph, 
 											Vertex[] vertexs, Edge[] edges) 
 											throws IOException, LpSolveException
 	{
-		LpModel lpModel = new LpModel(SHARED_EDGE_PONDERATION, STRONG_SHARED_EDGE, AMOUNT_OF_VERTEX, AMOUNT_OF_PATH,
+		WNLpFormat lpModel = new WNLpFormat(SHARED_EDGE_PONDERATION, STRONG_SHARED_EDGE, AMOUNT_OF_VERTEX, AMOUNT_OF_PATH,
 									  MAX_WEIGHT_EDGE, EDGE_DENSITY, graph, 
 									  vertexs, edges);	
 		
 		return lpModel;
 	}
 	
-	public static LpModel generateLpModel(int amount_of_vertex,int edge_density,int amount_of_path,int max_weight_edge) throws IOException, LpSolveException{
+	public static WNLpFormat generateLpModel(int amount_of_vertex,int edge_density,int amount_of_path,int max_weight_edge) throws IOException, LpSolveException{
 		LinkedList<Vertex> listVertexs = new LinkedList<Vertex>();
 		LinkedList<Edge> listEdges     = new LinkedList<Edge>();
 		ListenableDirectedWeightedGraph<Vertex,Edge> graph = generateGraph(amount_of_vertex,edge_density,max_weight_edge,amount_of_path,listVertexs,listEdges);
@@ -121,7 +130,7 @@ public class LpModel{
 		vertexs = listVertexs.toArray(vertexs);
 		edges = listEdges.toArray(edges);
 		
-		LpModel model = new LpModel(0,false,amount_of_vertex, amount_of_path, max_weight_edge, edge_density, graph, vertexs, edges);
+		WNLpFormat model = new WNLpFormat(0,false,amount_of_vertex, amount_of_path, max_weight_edge, edge_density, graph, vertexs, edges);
 		return model;
 	}
 	
@@ -356,8 +365,8 @@ public class LpModel{
 		return paths;
 	}
 	
-	public static LpModel testLpModel(ListenableDirectedWeightedGraph<Vertex,Edge> graph, int amount_of_path,Vertex[] vertexs, Edge[] edges) throws IOException, LpSolveException{
-		return new LpModel(0,false,graph.vertexSet().size(), amount_of_path, Integer.MAX_VALUE, 100, graph, vertexs,edges);
+	public static WNLpFormat testLpModel(ListenableDirectedWeightedGraph<Vertex,Edge> graph, int amount_of_path,Vertex[] vertexs, Edge[] edges) throws IOException, LpSolveException{
+		return new WNLpFormat(0,false,graph.vertexSet().size(), amount_of_path, Integer.MAX_VALUE, 100, graph, vertexs,edges);
 	}
 	
 	private static int amountSE(GraphPath<Vertex,Edge> pi, GraphPath<Vertex,Edge> pj){

@@ -1,4 +1,4 @@
-package main;
+package main.util;
 
 import java.util.Observable;
 
@@ -30,6 +30,11 @@ public class Report extends Observable{
 		st.append(str + "\n");
 		setChanged();
 		notifyObservers();		
+	}
+	
+	public static void  main(String args[]){
+		System.out.println("OK");
+		System.exit(0);
 	}
 }
 

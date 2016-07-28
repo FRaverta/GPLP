@@ -1,18 +1,20 @@
-package main;
+package main.lpModel.wireNet;
 
 import java.util.List;
 
-import org.jgrapht.DirectedGraph;
+
 import org.jgrapht.GraphPath;
 import org.jgrapht.graph.ListenableDirectedWeightedGraph;
 
-public class Metrics {
+import main.Parameters;
+import main.util.Edge;
+import main.util.Metrics;
+import main.util.Vertex;
+
+
+public class WNMetrics extends Metrics {
+		
 	
-	public final int amount_of_edges;
-	public final int amount_of_vertex;
-	public final List<GraphPath<Vertex,Edge>> paths;
-	public final int amount_of_path;
-//	public final int amount_of_unreachable_vertex;
 	
 	/**
 	 * eg. 3 path from source to target(see A,B,C) 
@@ -22,11 +24,6 @@ public class Metrics {
 	 * */
 	public final double shared_edges_average;
 	
-	public final double cost_average;
-	
-	public final double max_cost;
-	
-	public final double min_cost;
 	
 	/** "FAULT TOLERANCE METRICS" */
 	
@@ -62,22 +59,25 @@ public class Metrics {
 	 * */
 	public final int paa1fwc;
 	
-	public Metrics(ListenableDirectedWeightedGraph<Vertex,Edge> g,Vertex source, Vertex target){
-		this.amount_of_edges = g.edgeSet().size();
-		this.amount_of_vertex = g.vertexSet().size();
-		this.paths = LpModel.getAllSinglePath(g, source, target);
-		this.amount_of_path = paths.size();
-		//amount_of_unreachable_vertex
+	
+	public WNMetrics(ListenableDirectedWeightedGraph<Vertex,Edge> g,Vertex source, Vertex target){
+		super(g,source,target);
 		
-		shared_edges_average = calculateSharedEdgeAverage();
-		this.cost_average = calculateCostAverage();
-		this.min_cost = calculateMinCost();
-		this.max_cost = calculateMaxCost();
-		
+		shared_edges_average = calculateSharedEdgeAverage();		
 		this.paa1f = calculatePaa1f(g);
 		this.paa1fwc = calculatePaa1fwc(g);
-		
 		Parameters.report.writeln(this.toString());		
+	}
+	
+	/**
+	 * Dummy constructor for test proposes 
+	 * */
+	public WNMetrics(){
+		super();
+		paa1f = 0;
+		paa1fwc = 0;
+		shared_edges_average = 0;
+		
 	}
 
 	private int calculatePaa1fwc(ListenableDirectedWeightedGraph<Vertex, Edge> g) {
@@ -111,28 +111,6 @@ public class Metrics {
 		return result/this.amount_of_edges;
 	}
 
-	private double calculateMinCost() {
-		double min = Double.MAX_VALUE;
-		for(GraphPath<Vertex,Edge> p: paths)
-			if(calcPathCost(p) < min) min = calcPathCost(p);
-		return min;
-	}
-
-	private double calculateMaxCost() {
-		double max = Double.MIN_VALUE;
-		for(GraphPath<Vertex,Edge> p: paths)
-			if(calcPathCost(p) > max) max = calcPathCost(p);
-		return max;
-	}
-
-	private double calculateCostAverage() {
-		double cost = 0;
-		for(GraphPath<Vertex,Edge> p: paths)
-			cost += calcPathCost(p);
-		
-		cost = cost/this.amount_of_path;
-		return cost;
-	}
 
 	private double calculateSharedEdgeAverage() {
 		double shared = 0;
@@ -152,29 +130,78 @@ public class Metrics {
 		return shared;
 	}
 
-	private double calcPathCost(GraphPath<Vertex,Edge> p){
-		double r= 0;
-		for(Edge e: p.getEdgeList())
-			r+=e.weight;
-		
-		return r;
-	}
 	
 	public String toString(){
 		StringBuilder st = new StringBuilder();
-		st.append("----------------------Metrics Report----------------------+\n");
-		st.append("amount_of_edges: " +  amount_of_edges + "\n");
-		st.append("amount_of_vertex: " + amount_of_vertex + "\n");
-		st.append("amount_of_path: " + amount_of_path + "\n");
-		st.append("shared_edges_average: " + shared_edges_average + "\n");
-		st.append("cost_average: " + cost_average + "\n");
-		st.append("max_cost: " + max_cost + "\n");
-		st.append("min_cost: " + min_cost + "\n");
-
-		st.append("Path availables after 1 failure in average " + paa1f + "\n");
-		st.append("Path availables after 1 failure in the worst case " + paa1fwc + "\n");
-		st.append("----------------------------------------------------------+\n");
 		
+		st.append(super.toString());
+		
+		st.append("Path availables after 1 failure in average " + paa1f + "\n");
+		st.append("Path availables after 1 failure in the worst case " + paa1fwc + "\n");	
+
+		st.append("----------------------------------------------------------+\n");
+
 		return st.toString();
 	}
+	
+//	public static void main(String args[]){
+//		double A = 0.8;
+//		double B = 0.9;
+//		double C = 0.8;
+//		double D = 0.9;
+//		double E = 0.8;
+//		double d = E * ( ( (A + C) - (A*C)) * ((B+D) - (B*D))) + (1 - E) * ((A*B + C*D) - (A*B*C*D));
+//		System.out.println(d);
+//	}
+	
+
+
+public List<GraphPath<Vertex, Edge>> getAllSinglePath(ListenableDirectedWeightedGraph<Vertex, Edge> g, Vertex source,Vertex target) {
+	return WNLpFormat.getAllSinglePath(g, source, target);
+}
+
+
+
+//public static void main(String args[]){
+////	double R1 = 0.4;
+////	double R2 = 0.5;
+////	double C1 = 0.3;
+////	double C2 = 0.2;
+////	double T = 0.6;
+////	double Ha = (R1 * C1) + (R2 * C2) - (R1 * C1 * R2 * C2)  ;
+////	System.out.println("Ha= " + Ha);
+////	double Hb = (T * (1 - ((1-R1) * (1-R2))) * (1- ((1-C1) * (1-C2)))) + (1-T) * Ha  ;
+////	System.out.println("Hb= " + Hb);
+//	
+//	LinkedList<LinkedList> s = new LinkedList<LinkedList>();
+//
+//	LinkedList<String> e = new LinkedList<String>(); e.add("A");
+//	s.add(e);
+//	
+//	e = new LinkedList(); e.add("B");
+//	s.add(e);
+//	
+//	e = new LinkedList(); e.add("C");
+//	s.add(e);
+//	
+//	e = new LinkedList(); e.add("D");
+//	s.add(e);
+//	
+//	e = new LinkedList(); e.add("E");
+//	s.add(e);
+//
+//	
+//	LinkedList l = getCombination(s);
+//	System.out.println(l.toString());
+//	System.out.println(l.size());
+//}
+//public static void main(String args[]){
+//	WNMetrics m = new WNMetrics();
+//	Expr e = m.genFlowAvailableConfigurationExpr(Parameters.E4_GRAPH,Parameters.E4_Vertexs[0],Parameters.E4_Vertexs[Parameters.E4_Vertexs.length -1],2);
+//	System.out.println(e.toString());
+//	double a = m.H(e);
+//	System.out.println(a);
+//}
+
+
 }

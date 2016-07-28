@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"  
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns
+     http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+		 
+  <key id="mttr" for="edge" attr.name="mttr" attr.type="float"/>
+	<key id="mttf" for="edge" attr.name="mttf" attr.type="float"/>
+	<key id="a" for="edge" attr.name="a" attr.type="float"/>
+	<key id="groups" for="edge" attr.name="groups" attr.type="string"/>
+	<key id="delay" for="edge" attr.name="delay" attr.type="float"/>
+	<key id="group_params" for="graph" attr.name="group_params" attr.type="string"/>
+						 
+  <graph id="G1" edgedefault="directed">
+		
+    <node id="n0"/>
+    <node id="n1"/>
+    <node id="n2"/>
+		
+    <edge id="e0" source="n0" target="n1">
+			<data key="mttf">1000</data>
+			<data key="mttr">12</data>
+		</edge>
+    <edge id="e1" source="n1" target="n2">
+			<data key="mttf">13000</data>
+			<data key="mttr">40</data>
+		</edge>
+
+  </graph>
+</graphml>

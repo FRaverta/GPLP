@@ -2,6 +2,10 @@ package main;
 
 import org.jgrapht.graph.ListenableDirectedWeightedGraph;
 
+import main.util.Edge;
+import main.util.Report;
+import main.util.Vertex;
+
 public final class Parameters {
 	
 	/** Default example parameters */
@@ -46,7 +50,25 @@ public final class Parameters {
 	public static final double E3_SHARED_EDGE_PONDERATION = 0.5;
 
 	
+	/** Example availability example parameters */
+	public static final int E4_EDGE_DENSITY = 50;
+	public static final int E4_AMOUNT_OF_NODES = 4;
+	public static final int E4_AMOUNT_OF_REQUIRED_PATHS = 2;
+	public static final int E4_MAX_WEIGHT_EDGE = 4;
+	public static final Edge[] E4_Edges = new Edge[6];
+	public static final Vertex[] E4_Vertexs = new Vertex[E4_AMOUNT_OF_NODES];
+	public static final ListenableDirectedWeightedGraph<Vertex,Edge> E4_GRAPH = createE4Graph();
+	public static final double E4_SHARED_EDGE_PONDERATION = 0.5;
 	
+	/** Example availability example parameters 2 */
+	public static final int E5_EDGE_DENSITY = 50;
+	public static final int E5_AMOUNT_OF_NODES = 4;
+	public static final int E5_AMOUNT_OF_REQUIRED_PATHS = 2;
+	public static final int E5_MAX_WEIGHT_EDGE = 4;
+	public static final Edge[] E5_Edges = new Edge[6];
+	public static final Vertex[] E5_Vertexs = new Vertex[E5_AMOUNT_OF_NODES];
+	public static final ListenableDirectedWeightedGraph<Vertex,Edge> E5_GRAPH = createE5Graph();
+	public static final double E5_SHARED_EDGE_PONDERATION = 0.5;
 	
 	/*Report text*/
 	public static final Report report = new Report();
@@ -222,7 +244,60 @@ public final class Parameters {
 		return graph;
 
 	}
+	
 
+	
+	private static ListenableDirectedWeightedGraph<Vertex, Edge> createE4Graph() {
+		ListenableDirectedWeightedGraph<Vertex, Edge> graph = new ListenableDirectedWeightedGraph<Vertex,Edge>(Edge.class);
+		
+		for(int i=0; i<E4_AMOUNT_OF_NODES; i++){
+			E4_Vertexs[i] = new Vertex("V" + i);
+			graph.addVertex(E4_Vertexs[i]);
+		}
+		
+		E4_Edges[0] = new Edge("A",E4_Vertexs[0],E4_Vertexs[1],4,1,0.4);
+		E4_Edges[1] = new Edge("B",E4_Vertexs[1],E4_Vertexs[3],4,1,0.3);
+		E4_Edges[2] = new Edge("C",E4_Vertexs[0],E4_Vertexs[2],4,1,0.5);
+		
+		E4_Edges[3] = new Edge("D",E4_Vertexs[2],E4_Vertexs[3],4,1,0.2);
+		E4_Edges[4] = new Edge("E",E4_Vertexs[1],E4_Vertexs[2],4,1,0.6);
+		E4_Edges[5] = new Edge("E",E4_Vertexs[2],E4_Vertexs[1],4,1,0.6);
+		
+		for(int i=0; i<E4_Edges.length; i++){
+			graph.addEdge(E4_Edges[i].from,E4_Edges[i].to,E4_Edges[i]);	
+			graph.setEdgeWeight(E4_Edges[i], E4_Edges[i].weight);
+		}
+		
+		
+		return graph;
 
+	}
+
+	private static ListenableDirectedWeightedGraph<Vertex, Edge> createE5Graph() {
+		ListenableDirectedWeightedGraph<Vertex, Edge> graph = new ListenableDirectedWeightedGraph<Vertex,Edge>(Edge.class);
+		
+		for(int i=0; i<E5_AMOUNT_OF_NODES; i++){
+			E5_Vertexs[i] = new Vertex("V" + i);
+			graph.addVertex(E5_Vertexs[i]);
+		}
+		
+		E5_Edges[0] = new Edge("A",E5_Vertexs[0],E5_Vertexs[1],4,0,0.8);
+		E5_Edges[1] = new Edge("B",E5_Vertexs[1],E5_Vertexs[3],4,0,0.9);
+		E5_Edges[2] = new Edge("C",E5_Vertexs[0],E5_Vertexs[2],4,0,0.8);
+		
+		E5_Edges[3] = new Edge("D",E5_Vertexs[2],E5_Vertexs[3],4,0,0.9);
+		E5_Edges[4] = new Edge("E",E5_Vertexs[1],E5_Vertexs[2],4,0,0.8);
+		E5_Edges[5] = new Edge("E",E5_Vertexs[2],E5_Vertexs[1],4,0,0.8);
+	
+
+		for(int i=0; i<E5_Edges.length; i++){
+			graph.addEdge(E5_Edges[i].from,E5_Edges[i].to,E5_Edges[i]);	
+			graph.setEdgeWeight(E5_Edges[i], E5_Edges[i].weight);
+		}
+		
+		
+		return graph;
+
+	}
 
 }

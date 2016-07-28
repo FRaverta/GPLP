@@ -7,10 +7,9 @@ import org.jgrapht.graph.ListenableDirectedWeightedGraph;
 import org.junit.Test;
 
 import junit.framework.TestCase;
-import main.Edge;
-import main.LpModel;
-import main.PathFinder;
-import main.Vertex;
+import main.util.Edge;
+import main.util.Vertex;
+import main.lpModel.wireNet.WNLpFormat;
 
 public class testLpModel extends TestCase {
 	
@@ -69,14 +68,14 @@ public class testLpModel extends TestCase {
 		
 		
 		try{
-			LpModel lpModel = LpModel.testLpModel(graph, 3, vertexs, edges);
+			WNLpFormat lpModel = WNLpFormat.testLpModel(graph, 3, vertexs, edges);
 		
 			//entry graph assertion
 			assertEquals("The entry graph and the result graph must have the same amount of  nodes", lpModel.resultGraph.vertexSet().size(),graph.vertexSet().size());
-			assertEquals("Amount of paths error", LpModel.getAllSinglePath(graph, vertexs[0], vertexs[vertexs.length-1]).size(),4);
+			assertEquals("Amount of paths error", WNLpFormat.getAllSinglePath(graph, vertexs[0], vertexs[vertexs.length-1]).size(),4);
 			
 			//result graph assertion
-			assertEquals("Amount of paths error", LpModel.getAllSinglePath(lpModel.resultGraph, vertexs[0], vertexs[vertexs.length-1]).size(),3);
+			assertEquals("Amount of paths error", WNLpFormat.getAllSinglePath(lpModel.resultGraph, vertexs[0], vertexs[vertexs.length-1]).size(),3);
 			assertEquals("Amount of edges error", lpModel.resultGraph.edgeSet().size(),6);
 			
 			//entry graph metrics test			

@@ -1,0 +1,95 @@
+package dtn;
+import java_cup.runtime.*;
+import java.io.FileReader;
+import java.util.*;
+   
+/* Codigo del parser, se copia integramente a la clase final.
+    Agregamos el manejo de errores. */
+
+action code {:
+//Global variables   
+	Integer AMOUNT_OF_NODES;
+	
+	private void setAmountOfNodes(Integer n){
+		AMOUNT_OF_NODES = n;
+	}
+
+//Method for report error and information about this
+    public void report_error(String message, Object info) {
+        StringBuilder m = new StringBuilder("Error");
+
+
+        m.append(" : "+message);
+        System.out.println(m + " " + info.toString());
+        System.exit(1); //Interrumpo la ejecucion
+    }
+
+
+
+
+:}
+
+parser code{:    
+	
+	public static DTNetwork parseFromFile(String path) throws Exception{
+        parser a = new parser(new DTNFormatLexer( new FileReader(path)));
+		return  (DTNetwork) a.parse().value;		
+	}
+	
+    //Method for report sintax error and information about this
+    public void report_error(String message, Object info) {
+        StringBuilder m = new StringBuilder("Error");
+        if (info instanceof java_cup.runtime.Symbol) {
+            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+            if (s.left >= 0) {                
+                m.append(" in line "+(s.left+1));
+                if (s.right >= 0)
+                    m.append(", column "+(s.right+1));
+            }
+        }
+        m.append(" : "+message);
+        System.out.println(m + "  " + info.toString());
+        System.exit(1); //Interrumpo la ejecucion
+    }
+  
+:}
+
+init with {:               
+             //We Can't use this block for parser variables inicialization, we should do this in a extra-rule called "begin"
+          :}
+
+  
+   
+// Terminales (tokens obtenidos por el analizador lexico).  
+
+
+terminal NODES,INTERVALS,LBRACKET,RBRACKET,LBRACE,RBRACE,STRING;
+terminal Integer INT;
+
+
+// No Terminales (producciones).  
+                        
+non terminal DTNetwork DTNFORMAT;
+non terminal List<State> FSM;
+non terminal State STATE;
+non terminal List<Field> STATE_DECL;   
+non terminal Field FIELD;
+   
+// La gramatica 
+
+
+start with DTNFORMAT;
+
+DTNFORMAT ::=	NODES INT:nodes {: setAmountOfNodes(nodes); :} INTERVALS INT:intervals FSM:states {: RESULT = new DTNetwork(nodes, intervals, states);  :};
+
+FSM ::= STATE:s {: RESULT = new LinkedList<State>(); RESULT.add(0,s); :};
+FSM ::= STATE:s FSM:statesList {: RESULT = new LinkedList<State>(statesList); RESULT.add(0,s); :};
+
+STATE ::= INT:d LBRACE STATE_DECL:decls RBRACE {: RESULT = new State(AMOUNT_OF_NODES,d, decls);  :};
+
+STATE_DECL ::= FIELD:f STATE_DECL:decls {: RESULT = new LinkedList<Field>(decls); RESULT.add(0,f); :};
+STATE_DECL ::= FIELD:f {: RESULT = new LinkedList<Field>(); RESULT.add(f); :};
+
+FIELD ::= INT:i {: RESULT = new Field(i); :};
+FIELD ::= INT:i LBRACKET INT:w RBRACKET {: RESULT = new Field(i,w); :};    
+					

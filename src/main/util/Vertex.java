@@ -1,7 +1,7 @@
-package main;
+package main.util;
 
 public class Vertex {
-	final String name;
+	public final String name;
 	
 	public Vertex(String name){
 		this.name = name;

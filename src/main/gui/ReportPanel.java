@@ -1,4 +1,4 @@
-package gui;
+package main.gui;
 
 import java.awt.Dimension;
 import java.awt.Font;
@@ -10,7 +10,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import main.Parameters;
-import main.Report;
+import main.util.Report;
 
 public class ReportPanel implements Observer {
 

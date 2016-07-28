@@ -1,4 +1,4 @@
-package gui;
+package main.gui;
 
 import java.awt.Component;
 import java.awt.EventQueue;
@@ -13,8 +13,6 @@ import javax.swing.JTextField;
 
 import org.jgrapht.graph.ListenableDirectedGraph;
 
-import main.Controller;
-import main.JGraphAdapterDemo;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import javax.swing.JTextArea;

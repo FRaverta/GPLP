@@ -1,4 +1,4 @@
-package gui;
+package main.gui;
 
 import java.awt.Color;
 import java.awt.EventQueue;
@@ -7,6 +7,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -21,10 +23,8 @@ import javax.swing.JTextField;
 import org.jgrapht.graph.ListenableDirectedGraph;
 import org.jgrapht.graph.ListenableDirectedWeightedGraph;
 
-import main.Controller;
-import main.Edge;
-import main.JGraphAdapterDemo;
-import main.Vertex;
+import main.util.Edge;
+import main.util.Vertex;
 
 public class NewWindow {
 
@@ -99,7 +99,29 @@ public class NewWindow {
 		menu.add(newItem);upPanel.add(menu);
 		newItem.addActionListener(new ActionListener(){
 				public void actionPerformed(ActionEvent e){				
-					studyCasesWindow.setVisible(true);					
+					studyCasesWindow.setVisible(true);
+				}
+			});
+		}
+		
+		{
+		//boton load tree topology
+		JMenuItem newItem = new JMenuItem("Run DTN");
+		menu.add(newItem);upPanel.add(menu);
+		newItem.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent e){				
+					controller.runDTN();
+				}
+			});
+		}
+		
+		{
+		//boton load tree topology
+		JMenuItem newItem = new JMenuItem("Run DTN MultiFlow");
+		menu.add(newItem);upPanel.add(menu);
+		newItem.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent e){				
+					controller.runDTNMultiFlow();
 				}
 			});
 		}
@@ -233,6 +255,14 @@ public class NewWindow {
 		//Jdialog
 		this.sampleWindow = new NewSampleWindow(this);
 		this.studyCasesWindow = new StudyCasesWindow(this);
+		
+	     frame.addWindowListener(new WindowAdapter() {
+	          public void windowClosing(WindowEvent e) {
+	              sampleWindow.dispose();
+	              studyCasesWindow.dispose();
+	              System.out.println("a");
+	          }
+	     });
 	}
 	
 	public void setGraphs(ListenableDirectedGraph graph_up,ListenableDirectedGraph graph_down){
