@@ -198,7 +198,7 @@ public class Controller {
 
 	public void runDTN() {
 		try {
-				DTNLpModel model = DTNLpModel.generateFromFile("/home/nando/development/Doctorado/Ej1/Examples/DTNExamples/DTN3",2,4);							
+				DTNLpModel model = DTNLpModel.generateFromFile("/home/nando/development/Doctorado/Ej1/Examples/DTNExamples/DTN3",2,0);							
 				gui.setGraphs(model.graph,model.resultGraph);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

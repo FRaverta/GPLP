@@ -11,7 +11,10 @@ import main.util.Edge;
 import main.util.Vertex;
 
 public class DTNetwork {
-
+	
+	/** Constat for represent a default availability(non fail probability) for a DTN link */
+	private static final double DEFAULT_AVAILABILITY = 0.5;
+	
 	public final int AMOUNT_OF_NODES;
 	public final int AMOUNT_OF_INTERVALS;
 	public final List<State> STATES;
@@ -53,7 +56,8 @@ public class DTNetwork {
 			for(int i=0; i < AMOUNT_OF_NODES; i++)
 				for(int j=0; j < AMOUNT_OF_NODES; j++ )
 					if( s.links[i][j].enable ){
-						Edge e = new Edge("E" + edges.size(),vertexs[k][i],vertexs[k][j], s.links[i][j].weight,STATES.get(k).LENGTH);
+						//create an edge with default availability
+						Edge e = new Edge("E" + edges.size(),vertexs[k][i],vertexs[k][j], s.links[i][j].weight,STATES.get(k).LENGTH,DEFAULT_AVAILABILITY);
 						edges.add(e);
 						result.addEdge(e.from, e.to,e);
 						result.setEdgeWeight(e, e.weight);
@@ -63,7 +67,8 @@ public class DTNetwork {
 		//create inter-state edges EXEPT FOR THE LAST VERTEX
 		for(int i=0; i < AMOUNT_OF_NODES -1 ; i++)	
 			for(int k=0; k < AMOUNT_OF_INTERVALS-1; k++){
-				Edge e = new Edge("E" + edges.size(),vertexs[k][i],vertexs[k+1][i], STATES.get(k).LENGTH);
+				//create an edge with no limit in capacity and no limit in capacity
+				Edge e = new Edge("E" + edges.size(),vertexs[k][i],vertexs[k+1][i], STATES.get(k).LENGTH,Edge.MAX_CAPACITY,1);
 				edges.add(e);
 				result.addEdge(e.from, e.to,e);
 				result.setEdgeWeight(e, e.weight);
@@ -72,8 +77,9 @@ public class DTNetwork {
 
 		Vertex targetVertex = new Vertex("T");
 		result.addVertex(targetVertex);
-		for(int k=0; k < AMOUNT_OF_INTERVALS; k++){			
-			Edge e = new Edge("E" + edges.size(),vertexs[k][AMOUNT_OF_NODES-1],targetVertex, 0);
+		for(int k=0; k < AMOUNT_OF_INTERVALS; k++){		
+			//Create an edge with no limit in capacity an always available because it isn't in the real DTN network (it is a added by representation link )
+			Edge e = new Edge("E" + edges.size(),vertexs[k][AMOUNT_OF_NODES-1],targetVertex, 0,Edge.MAX_CAPACITY,1);
 			edges.add(e);
 			result.addEdge(e.from, e.to,e);
 			result.setEdgeWeight(e, e.weight);

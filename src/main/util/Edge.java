@@ -4,6 +4,9 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 
 public class Edge extends DefaultWeightedEdge {
 	
+	/**Constant that indicates no capacity limit in edge*/
+	public static int MAX_CAPACITY = Integer.MAX_VALUE;
+	
 	public final String name;
 	
 	public final Vertex from;
@@ -22,7 +25,7 @@ public class Edge extends DefaultWeightedEdge {
 
 
 	public Edge(String name,Vertex from, Vertex to, int weight){		
-		this(name, from, to, weight,Integer.MAX_VALUE,(weight>0)?1:0.5);
+		this(name, from, to, weight,MAX_CAPACITY,1);
 	}
 	
 	public Edge(String name, Vertex from, Vertex to, int weight, int capacity, double availability) {
@@ -35,7 +38,7 @@ public class Edge extends DefaultWeightedEdge {
 	}
 	
 	public Edge(String name, Vertex from, Vertex to, int weight, int capacity) {
-		this(name, from, to, weight,capacity,(weight>0)?1:0.5);
+		this(name, from, to, weight,capacity,1);
 	}
 	
 	
