@@ -22,7 +22,7 @@ import org.jgrapht.alg.AllDirectedPaths;
  * for a wire network.
  * 
  * */
-public class WNLpFormat{
+public class WNLpModel{
 	
 	private static final int MAX_ATTEMPT_RANDOM_GRAPH = 5000;
 
@@ -57,7 +57,7 @@ public class WNLpFormat{
 	public final WNMetrics resultMetrics;
 
 
-	private WNLpFormat(
+	private WNLpModel(
 			double SHARED_EDGE_PONDERATION, boolean STRONG_SHARED_EDGE, int AMOUNT_OF_VERTEX, int AMOUNT_OF_PATH,int MAX_WEIGHT_EDGE, 
 			int EDGE_DENSITY,ListenableDirectedWeightedGraph<Vertex,Edge> graph, 
 			Vertex[] vertexs, Edge[] edges) throws IOException, LpSolveException
@@ -84,13 +84,13 @@ public class WNLpFormat{
 	 * @throws LpSolveException 
 	 * 
 	 * */
-	public static WNLpFormat DefaultLPModel() throws IOException, LpSolveException
+	public static WNLpModel DefaultLPModel() throws IOException, LpSolveException
 	{
 //		WNLpFormat lpModel = new WNLpFormat(
 //										Parameters.SHARED_EDGE_PONDERATION,false,Parameters.AMOUNT_OF_NODES, Parameters.AMOUNT_OF_REQUIRED_PATHS,
 //				  						Parameters.MAX_WEIGHT_EDGE, Parameters.EDGE_DENSITY, Parameters.DEFAULT_GRAPH, 
 //				  						Parameters.Vertexs, Parameters.Edges);	
-		WNLpFormat lpModel = new WNLpFormat(
+		WNLpModel lpModel = new WNLpModel(
 				Parameters.SHARED_EDGE_PONDERATION,false,Parameters.AMOUNT_OF_NODES, Parameters.AMOUNT_OF_REQUIRED_PATHS,
 					Parameters.MAX_WEIGHT_EDGE, Parameters.EDGE_DENSITY, Parameters.DEFAULT_GRAPH, 
 					Parameters.Vertexs, Parameters.Edges);		
@@ -103,20 +103,20 @@ public class WNLpFormat{
 	 * @throws LpSolveException 
 	 * 
 	 * */
-	public static WNLpFormat LpModelFromGraph(
+	public static WNLpModel LpModelFromGraph(
 											double SHARED_EDGE_PONDERATION,boolean STRONG_SHARED_EDGE ,int AMOUNT_OF_VERTEX, int AMOUNT_OF_PATH,int MAX_WEIGHT_EDGE, 
 											int EDGE_DENSITY,ListenableDirectedWeightedGraph<Vertex,Edge> graph, 
 											Vertex[] vertexs, Edge[] edges) 
 											throws IOException, LpSolveException
 	{
-		WNLpFormat lpModel = new WNLpFormat(SHARED_EDGE_PONDERATION, STRONG_SHARED_EDGE, AMOUNT_OF_VERTEX, AMOUNT_OF_PATH,
+		WNLpModel lpModel = new WNLpModel(SHARED_EDGE_PONDERATION, STRONG_SHARED_EDGE, AMOUNT_OF_VERTEX, AMOUNT_OF_PATH,
 									  MAX_WEIGHT_EDGE, EDGE_DENSITY, graph, 
 									  vertexs, edges);	
 		
 		return lpModel;
 	}
 	
-	public static WNLpFormat generateLpModel(int amount_of_vertex,int edge_density,int amount_of_path,int max_weight_edge) throws IOException, LpSolveException{
+	public static WNLpModel generateLpModel(int amount_of_vertex,int edge_density,int amount_of_path,int max_weight_edge) throws IOException, LpSolveException{
 		LinkedList<Vertex> listVertexs = new LinkedList<Vertex>();
 		LinkedList<Edge> listEdges     = new LinkedList<Edge>();
 		ListenableDirectedWeightedGraph<Vertex,Edge> graph = generateGraph(amount_of_vertex,edge_density,max_weight_edge,amount_of_path,listVertexs,listEdges);
@@ -130,7 +130,7 @@ public class WNLpFormat{
 		vertexs = listVertexs.toArray(vertexs);
 		edges = listEdges.toArray(edges);
 		
-		WNLpFormat model = new WNLpFormat(0,false,amount_of_vertex, amount_of_path, max_weight_edge, edge_density, graph, vertexs, edges);
+		WNLpModel model = new WNLpModel(0,false,amount_of_vertex, amount_of_path, max_weight_edge, edge_density, graph, vertexs, edges);
 		return model;
 	}
 	
@@ -193,7 +193,7 @@ public class WNLpFormat{
 	 * 
 	 * */
 	private Pair<Integer,ListenableDirectedWeightedGraph<Vertex,Edge>> solve(double SHARED_EDGE_PONDERATION, boolean STRONG_SHARED_EDGE) throws IOException, LpSolveException{
-		Parameters.report.writeln("Creating LP Model\n. . .");
+		Parameters.report.writeln("Creating LP Model. . .");
 		
 		String prefix = "lpmodel";
 	    String suffix = ".tmp";
@@ -202,16 +202,16 @@ public class WNLpFormat{
 	    tempFile.deleteOnExit();
 	    
 	    FileWriter writer = new FileWriter(tempFile);
-	    String stringLpModel = generateLPFormatString(SHARED_EDGE_PONDERATION,STRONG_SHARED_EDGE);
+	    String stringLpModel = generateLPFormatString2(SHARED_EDGE_PONDERATION,STRONG_SHARED_EDGE);
 	    writer.append(stringLpModel);
 	    
-		Parameters.report.writeln("The LP model has been created: ");
-		Parameters.report.writeln(stringLpModel);
+		Parameters.report.writelnGreen("The LP model has been created: ");
+		Parameters.report.writeString(stringLpModel);
 	    
 	    writer.flush();
 	    writer.close();
 
-		Parameters.report.writeln("Solving Lp Model\n. . .");
+		Parameters.report.writeln("Solving Lp Model. . .");
 
 	    
 	    //Solve lp model	
@@ -237,7 +237,15 @@ public class WNLpFormat{
 	      
 	      return new Pair<Integer,ListenableDirectedWeightedGraph<Vertex,Edge>>(solverResult,resultGraph);
 	}
-	 
+	
+	/***
+	 * 
+	 * @param shared_edge_ponderation
+	 * @param strong_weighting
+	 * @return
+	 * @deprecated method create names for edges. Now method belive in edges names
+	 */
+	@Deprecated
 	public String generateLPFormatString(double shared_edge_ponderation, boolean strong_weighting){
 		//look for all simple path between node 0 and node 3
 		List<GraphPath<Vertex,Edge>> paths = getAllSinglePath(graph, vertexs[0],vertexs[vertexs.length - 1 ]);
@@ -352,6 +360,128 @@ public class WNLpFormat{
 
 	}
 	
+	
+	/***
+	 * 
+	 * @param shared_edge_ponderation
+	 * @param strong_weighting
+	 * @return
+	 *
+	 */
+	public String generateLPFormatString2(double shared_edge_ponderation, boolean strong_weighting){
+		//look for all simple path between node 0 and node 3
+		List<GraphPath<Vertex,Edge>> paths = getAllSinglePath(graph, vertexs[0],vertexs[vertexs.length - 1 ]);
+
+		StringBuilder st = new StringBuilder();
+		
+		st.append("min:");
+		//plus between all enables edges and its cost
+		for(Edge e: edges)
+			st.append(" +" + graph.getEdgeWeight(e) +" "+ e.name );
+		
+//		if(shared_edge_ponderation > 0){			
+//			for(int i=0;i<edges.length;i++){
+//				st.append(" -"+ shared_edge_ponderation + " E"+i);
+//			}
+//		}
+//		st.append(";\n");
+//		if(shared_edge_ponderation > 0){			
+//			for(int i=0;i<edges.length;i++){
+//				boolean b = false;
+//				for(int j=0; j<paths.size();j++){
+//					if(paths.get(j).getEdgeList().contains(edges[i])){
+//						st.append(" +" + shared_edge_ponderation+ " E" + i + " P" + j);
+//						b=true;					
+//					}
+//					
+//				}
+//				
+////				if(b){st.append(" -" + "E" + i + " " + shared_edge_ponderation);}				
+//			}
+//		}
+		
+		/*
+		 * weak weigthting: add terms to lp's target function for each edge like this: shared_edge_ponderation * Ei. 
+		 */
+		if(shared_edge_ponderation > 0 && !strong_weighting){
+			System.out.println(shared_edge_ponderation);
+			for(Edge e: edges )
+				st.append(" -" + shared_edge_ponderation+ " " + e.name);
+		}
+
+		/* 
+		 * strong weigthting: For each two path pi and pj where pi!=pj,
+		 * add variables to lp model pipj which meaning is path pi and pj are both available. 
+		 * And add for each of theses new variables terms like shared_edge_ponderation * ShE(pi,pj) * pipj, 
+		 * where ShE(pi,pj) is the function that compute the shared edges between two paths.   
+		 */
+		if(shared_edge_ponderation > 0 && strong_weighting){
+			for(int i=0; i<paths.size(); i++)
+				for(int j=i+1; j<paths.size(); j++){
+					int sharedEdge = amountSE(paths.get(i), paths.get(j));
+					if( sharedEdge > 0)
+						st.append(" +" + (shared_edge_ponderation * sharedEdge) + " P" + i + "P" + j);
+				}
+					
+		}
+
+		
+		
+		st.append(";\n");
+		
+		int constraintNumber=1;
+		
+		//amount of path constraint
+		st.append("r_" + constraintNumber + ":"); constraintNumber++;
+		for(int i=0; i<paths.size();i++)
+			st.append(" +P"+i);
+		st.append(" >= " + AMOUNT_OF_PATH + ";\n");
+		
+		//constraint about each path
+		for(int i=0;i<paths.size();i++){
+			st.append("r_"+ constraintNumber + ":"); constraintNumber++;
+			st.append("+" + paths.get(i).getEdgeList().size() + " P"+ i + " <=");
+			for(int j=0; j<paths.get(i).getEdgeList().size(); j++)
+				st.append(" +" + paths.get(i).getEdgeList().get(j).name);
+			st.append(";\n");
+		}
+		
+		
+		//constraint about strong shared edges 
+		if(strong_weighting)
+			for(int i=0; i<paths.size(); i++)
+				for(int j=i+1; j<paths.size(); j++){
+					int sharedEdge = amountSE(paths.get(i), paths.get(j));
+					if( sharedEdge > 0){		
+						st.append("r_"+ constraintNumber +":"); constraintNumber++;
+						st.append(" P" + i + " " + "+" + "P" + j + " <= +1 +P" + i + "P" + j + ";\n" );
+				
+					}
+				}
+		
+		st.append("\n");
+		
+		//constraint that all variables are boolean.				
+		st.append("bin");
+		for(int i=0; i<paths.size();i++)
+			st.append(" P" + i + ",");
+
+		for(Edge e: edges)
+			st.append(" " + e.name + ",");
+		
+		if(strong_weighting)
+			for(int i=0; i<paths.size(); i++)
+				for(int j=i+1; j<paths.size(); j++)
+					st.append(" P" + i + "P" + j + ",");
+		
+		st.deleteCharAt(st.length()-1);		
+		st.append(";");
+		
+		System.out.println(st.toString());
+		return st.toString();
+
+	}
+	
 	public static List<GraphPath<Vertex, Edge>> getAllSinglePath(ListenableDirectedWeightedGraph<Vertex,Edge> graph, Vertex source, Vertex target){
 		AllDirectedPaths<Vertex,Edge> pathFinder = new AllDirectedPaths<Vertex,Edge>(graph);
 		List<GraphPath<Vertex, Edge>> paths = pathFinder.getAllPaths(source,target,true,null);
@@ -365,8 +495,8 @@ public class WNLpFormat{
 		return paths;
 	}
 	
-	public static WNLpFormat testLpModel(ListenableDirectedWeightedGraph<Vertex,Edge> graph, int amount_of_path,Vertex[] vertexs, Edge[] edges) throws IOException, LpSolveException{
-		return new WNLpFormat(0,false,graph.vertexSet().size(), amount_of_path, Integer.MAX_VALUE, 100, graph, vertexs,edges);
+	public static WNLpModel testLpModel(ListenableDirectedWeightedGraph<Vertex,Edge> graph, int amount_of_path,Vertex[] vertexs, Edge[] edges) throws IOException, LpSolveException{
+		return new WNLpModel(0,false,graph.vertexSet().size(), amount_of_path, Integer.MAX_VALUE, 100, graph, vertexs,edges);
 	}
 	
 	private static int amountSE(GraphPath<Vertex,Edge> pi, GraphPath<Vertex,Edge> pj){

@@ -183,6 +183,22 @@ public abstract class Metrics {
 		return st.toString();
 	}
 	
+	public String toHTML(){
+		StringBuilder st = new StringBuilder();
+		st.append("---------------------- <b>Metrics Report</b> ----------------------<br/>");
+		st.append("amount_of_edges: " +  amount_of_edges + "<br/>");
+		st.append("amount_of_vertex: " + amount_of_vertex + "<br/>");
+		st.append("amount_of_path: " + amount_of_path + "<br/>");
+		st.append("cost_average: " + cost_average + "<br/>");
+		st.append("max_cost: " + max_cost + "<br/>");
+		st.append("min_cost: " + min_cost + "<br/>");
+		
+		st.append("Max avalaible flow " + max_flow + "<br/>");
+		st.append("Availability: " + availability + "<br/>");
+		
+		return st.toString();
+	}
+	
 //		public static void main(String args[]){
 //			double A = 0.8;
 //			double B = 0.9;

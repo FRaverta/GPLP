@@ -17,7 +17,7 @@ import main.util.Edge;
 import main.util.Vertex;
 
 //issue-> check unique identifier 
-public class GraphHandler extends DefaultHandler {
+public class XMLGraphParser extends DefaultHandler {
 
 	private LinkedList<Edge> edges;
 	private LinkedList<Vertex> vertexs;
@@ -31,8 +31,10 @@ public class GraphHandler extends DefaultHandler {
 	private boolean parsing_node;
 	private boolean parsing_data;
 	private boolean next_is_mttf;
-	private boolean  next_is_mttr;
+	private boolean next_is_mttr;
 	private boolean next_is_a;
+	private boolean next_is_weight;
+	private boolean next_is_capacity;
 	private String element_id;
 //	private String type_of_edge;
 	private String edge_source;
@@ -40,12 +42,10 @@ public class GraphHandler extends DefaultHandler {
 	private double mttr;
 	private double mttf;
 	private double a;
-	
-	/**Atributes for future use*/
-	private int edge_weight;
-	private int edge_capacity;
-	
-	public GraphHandler() {
+	private int capacity;
+	private int weight;
+		
+	public XMLGraphParser() {
 		
 		edges = new LinkedList<Edge>();
 		vertexs = new LinkedList<Vertex>();
@@ -56,13 +56,15 @@ public class GraphHandler extends DefaultHandler {
 		next_is_mttf = false;
 		next_is_mttr = false;
 		next_is_a = false;
+		next_is_weight = false;
+		next_is_capacity = false;
 		mttr = -1;
 		mttf = -1;
 		a = -1;
 		
 		/**Atributes for future use*/
-		edge_weight = 0;
-		edge_capacity = 0;	
+		weight = 0;
+		capacity = Edge.MAX_CAPACITY;	
 	}
 	
 	
@@ -100,10 +102,12 @@ public class GraphHandler extends DefaultHandler {
 					case "mttf" : next_is_mttf = true;break;
 					case "mttr" : next_is_mttr = true;break;
 					case "a"	: next_is_a = true;break;
+					case "weight"	: next_is_weight = true;break;
+					case "capacity"	: next_is_capacity = true;break;
 					case "groups": break; 
 					case "delay": break; 
 					
-					default: throw new SAXException("In data declaration, key field value must be ''mttf'', ''mttr'' or 'a'. (key ''groups'' and 'delays' are ingnored) \n");
+					default: throw new SAXException("In data declaration, key field value must be ''weight'',''capacity'',''mttf'', ''mttr'' or 'a'. (key ''groups'' and 'delays' are ingnored) \n");
 				}
 			}
 		}
@@ -122,24 +126,26 @@ public class GraphHandler extends DefaultHandler {
 			if(a >= 0){
 				Vertex source = searchSourceVertex(edge_source);
 				Vertex target = searchTargetVertex(edge_target);
-				Edge e = new Edge(element_id, source, target, edge_weight, edge_capacity, a);
+				Edge e = new Edge(element_id, source, target, weight, capacity, a);
 				edges.add(e);
 			}else if(mttr > 0 && mttf > 0){
 				Vertex source = searchSourceVertex(edge_source);
 				Vertex target = searchTargetVertex(edge_target);
-				Edge e = new Edge(element_id, source, target, edge_weight, edge_capacity, calcAvailability(mttr,mttf));
+				Edge e = new Edge(element_id, source, target, weight, capacity, calcAvailability(mttr,mttf));
 				edges.add(e);
 			}
 				else{
 					Vertex source = searchSourceVertex(edge_source);
 					Vertex target = searchTargetVertex(edge_target);
 					//Add edge with availability=1
-					Edge e = new Edge(element_id, source, target, edge_weight, edge_capacity,1);
+					Edge e = new Edge(element_id, source, target, weight, capacity,1);
 					edges.add(e);
 				}
 			mttr = -1;
 			mttf = -1;
 			a = -1;
+			capacity = Edge.MAX_CAPACITY;
+			weight = 0;
 			parsing_edge = false;
 		}
 		
@@ -148,6 +154,8 @@ public class GraphHandler extends DefaultHandler {
 			next_is_mttf = false;
 			next_is_mttr = false;
 			next_is_a = false;
+			next_is_weight = false;
+			next_is_capacity = false;
 		}
 	}
 
@@ -162,6 +170,11 @@ public class GraphHandler extends DefaultHandler {
 			mttf =  Double.parseDouble(aux); 
 			else if(next_is_a)
 				a =  Double.parseDouble(aux); 
+				else if(next_is_weight)
+					weight = Integer.parseInt(aux);
+					else if(next_is_capacity)
+						capacity = Integer.parseInt(aux);
+
 	}
 	
 	private Vertex searchTargetVertex(String id) throws SAXException{
@@ -208,12 +221,12 @@ public class GraphHandler extends DefaultHandler {
 			</edge>)*
 		</graph>
 	 * */
-	public static ListenableDirectedWeightedGraph<Vertex, Edge> parseXMLGraph(String path) throws ParserConfigurationException, SAXException, IOException{
-        GraphHandler handler = new GraphHandler();
+	public static ListenableDirectedWeightedGraph<Vertex, Edge> parseXMLGraph(File f) throws ParserConfigurationException, SAXException, IOException{
+        XMLGraphParser handler = new XMLGraphParser();
 		// parse
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser parser = factory.newSAXParser();
-        parser.parse(new File(path), handler);
+        parser.parse(f, handler);
         
 		ListenableDirectedWeightedGraph<Vertex, Edge> graph = new ListenableDirectedWeightedGraph<Vertex,Edge>(Edge.class);
 		
@@ -229,8 +242,28 @@ public class GraphHandler extends DefaultHandler {
 
 	}
 	
+	/**
+	 * Parse graph from a XML document in graphml format. 
+	 * Current implementation ignore field 'key' declaration and it always return directed graph.
+	 * The format expected could be expresed as the follow:
+	 * 
+	 *  <graph id="id_graph">
+	 *  	(<node id="id_node"/>)*
+	 *  	 (<edge id="e0" source="n0" target="n1">
+			  	(<data key="mttf">float value</data>)?
+				(<data key="mttr">float value</data>)?
+				(<data key="a">float value</data>)?
+			</edge>)*
+		</graph>
+	 * */
+	public static ListenableDirectedWeightedGraph<Vertex, Edge> parseXMLGraph(String path) throws ParserConfigurationException, SAXException, IOException{
+        File f = new File(path);
+        ListenableDirectedWeightedGraph<Vertex, Edge> result =  parseXMLGraph(f);
+		return result;
+	}
+	
 	public static void main(String args[]) throws ParserConfigurationException, SAXException, IOException{
-		ListenableDirectedWeightedGraph<Vertex, Edge> graph = GraphHandler.parseXMLGraph("/home/nando/development/Doctorado/Ej1/src/test_availability/data/g13.graphml");
+		ListenableDirectedWeightedGraph<Vertex, Edge> graph = XMLGraphParser.parseXMLGraph("/home/nando/development/Doctorado/Ej1/src/test_availability/data/g13.graphml");
 		System.out.println(graph.toString());
 	}
 	

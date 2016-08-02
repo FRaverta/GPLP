@@ -20,7 +20,7 @@ public class NewSampleWindow extends JDialog {
 	private JTextField edges_density;
 	private JTextField max_weight_edge;
 	private JTextField required_path;
-	private NewWindow window;
+	private MainWindow window;
 
 	/**
 	 * Launch the application.
@@ -39,7 +39,7 @@ public class NewSampleWindow extends JDialog {
 	 * Create the dialog.
 	 * @param frame 
 	 */
-	public NewSampleWindow(NewWindow window) {
+	public NewSampleWindow(MainWindow window) {
 		super(window.frame);
 		setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 		this.setModal(true);

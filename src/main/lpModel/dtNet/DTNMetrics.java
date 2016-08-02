@@ -25,7 +25,7 @@ public class DTNMetrics extends Metrics {
 		super(g, source, target);
 		this.minFlow = minFlow;
 		flow_availability = calcFlowAvailability(g, source, target, minFlow);
-		Parameters.report.writeln(this.toString());		
+		Parameters.report.writeln(this.toHTML());		
 	}
 
 	/**
@@ -48,6 +48,19 @@ public class DTNMetrics extends Metrics {
 
 		return st.toString();
 	}
+	
+	public String toHTML(){
+		StringBuilder st = new StringBuilder();
+		
+		st.append(super.toHTML());
+		
+		st.append("Availability of paths that delivery a flow  " + minFlow + " :" + flow_availability + "<br>");
+
+		st.append("----------------------------------------------------------<br>");
+
+		return st.toString();
+	}
+	
 	
 	/*****************************************************************/
 	//Methods for compute flow availability

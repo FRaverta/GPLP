@@ -17,7 +17,7 @@ import lpsolve.LpSolveException;
 import main.Parameters;
 import main.lpModel.dtNet.dtnParser.parser;
 import main.lpModel.wireNet.WNMetrics;
-import main.lpModel.wireNet.WNLpFormat;
+import main.lpModel.wireNet.WNLpModel;
 import main.util.Edge;
 import main.util.Pair;
 import main.util.Vertex;
@@ -57,16 +57,18 @@ public class DTNLpModel{
 	/** The result graph metrics */
 	public final DTNMetrics resultMetrics;
 
-	public final int s = 0;
+	/** Amount of allow shared edges between two paths */
+	public final int MAX_SHARED_EDGES;
 
 	private DTNLpModel(
-			int AMOUNT_OF_VERTEX, int AMOUNT_OF_PATH,int REQUIRED_CAPACITY, int MAX_WEIGHT_EDGE, 
-			int EDGE_DENSITY,ListenableDirectedWeightedGraph<Vertex,Edge> graph, 
+			int AMOUNT_OF_VERTEX, int AMOUNT_OF_PATH,int REQUIRED_CAPACITY, int MAX_SHARED_EDGES, 
+			int MAX_WEIGHT_EDGE, int EDGE_DENSITY,ListenableDirectedWeightedGraph<Vertex,Edge> graph, 
 			Vertex[] vertexs, Edge[] edges) throws IOException, LpSolveException
 	{
 		this.AMOUNT_OF_VERTEX  = AMOUNT_OF_VERTEX;
 		this.AMOUNT_OF_PATH    = AMOUNT_OF_PATH;
 		this.REQUIRED_CAPACITY = REQUIRED_CAPACITY;
+		this.MAX_SHARED_EDGES  = MAX_SHARED_EDGES;
 		this.MAX_WEIGHT_EDGE   = MAX_WEIGHT_EDGE; 
 		this.EDGE_DENSITY      = EDGE_DENSITY;
 		this.graph             = graph;
@@ -86,10 +88,27 @@ public class DTNLpModel{
 		ListenableDirectedWeightedGraph<Vertex, Edge> graph = net.toListenableDirectedWeightedGraph();
 	
 		DTNLpModel model = new DTNLpModel(
-										net.AMOUNT_OF_NODES * net.AMOUNT_OF_INTERVALS + 1, requiredPaths,requiredCapacity,
+										net.AMOUNT_OF_NODES * net.AMOUNT_OF_INTERVALS + 1, requiredPaths,requiredCapacity,Integer.MAX_VALUE,
 										0, 0 , graph, net.vertexs, net.edges
-									);
+										);
 		return model;
+	}
+	
+	
+	/**
+	 * Generate lp model
+	 * @throws LpSolveException 
+	 * 
+	 * */
+	public static DTNLpModel modelFromGraph(
+											int AMOUNT_OF_VERTEX, int AMOUNT_OF_PATH,int REQUIRED_CAPACITY, 
+											int MAX_SHARED_EDGES,ListenableDirectedWeightedGraph<Vertex,Edge> graph, 
+											Vertex[] vertexs, Edge[] edges) throws IOException, LpSolveException
+	{
+		DTNLpModel lpModel = new DTNLpModel(AMOUNT_OF_VERTEX,AMOUNT_OF_PATH,REQUIRED_CAPACITY,MAX_SHARED_EDGES,-1,-1,graph,vertexs,edges);	
+		
+		
+		return lpModel;
 	}
 	
 	public ListenableDirectedWeightedGraph<Vertex,Edge> generateGraphFromSolution(LpSolve solver) throws LpSolveException{
@@ -130,11 +149,11 @@ public class DTNLpModel{
 	    tempFile.deleteOnExit();
 	    
 	    FileWriter writer = new FileWriter(tempFile);
-	    String stringLpModel = generateLPFormatString();
+	    String stringLpModel = generateLPFormatString2();
 	    writer.append(stringLpModel);
 	    
-		Parameters.report.writeln("The LP model has been created: ");
-		Parameters.report.writeln(stringLpModel);
+		Parameters.report.writelnGreen("The LP model has been created: ");
+		Parameters.report.writeString(stringLpModel);
 	    
 	    writer.flush();
 	    writer.close();
@@ -271,7 +290,12 @@ public class DTNLpModel{
 //		return st.toString();
 //
 //	}
-	
+	/***
+	 * 
+	 * @return
+	 * @deprecated
+	 */
+	@Deprecated
 	public String generateLPFormatString(){
 	//look for all simple path between node 0 and node 3
 	List<GraphPath<Vertex,Edge>> paths = getAllSinglePath(graph, vertexs[0],vertexs[vertexs.length - 1 ]);
@@ -335,7 +359,7 @@ public class DTNLpModel{
 	/** Constraint about paths can share S edges two and two */
 	for(int i=0; i<paths.size(); i++)
 		for(int j=i+1; j<paths.size(); j++){
-			st.append("r_"+ constraintNumber +":" + sharedEdges(paths.get(i),paths.get(j)) + " P" + i + "P" + j + " <= " + s + " ;\n");
+			st.append("r_"+ constraintNumber +":" + sharedEdges(paths.get(i),paths.get(j)) + " P" + i + "P" + j + " <= " + MAX_SHARED_EDGES + " ;\n");
 			constraintNumber++;
 		}
 	
@@ -382,13 +406,123 @@ public class DTNLpModel{
 	return st.toString();
 
 }
+
+	public String generateLPFormatString2(){
+	List<GraphPath<Vertex,Edge>> paths = getAllSinglePath(graph, vertexs[0],vertexs[vertexs.length - 1 ]);
+
+	StringBuilder st = new StringBuilder();
+	
+	st.append("min:");
+	
+	//plus between all enables PATHS and its cost
+//	for(int i=0; i<paths.size();i++)
+//		st.append(" +" + paths.get(i).getWeight()+" P"+i );
+
+	//plus between all enables Edges and its cost
+	for(Edge e: edges)
+		st.append(" +" + graph.getEdgeWeight(e) +" " + e.name );
+	
+	st.append(" ;\n");
+	
+	int constraintNumber=1;
+	
+	//amount of path constraint
+	st.append("r_" + constraintNumber + ":"); constraintNumber++;
+	for(int i=0; i<paths.size();i++)
+		st.append(" +P"+i);
+	st.append(" >= " + AMOUNT_OF_PATH + ";\n");
+	
+	//constraint about each path: If Pi is enable so Pi's edges must be enabled also.
+	for(int i=0;i<paths.size();i++){
+		st.append("r_"+ constraintNumber + ":"); constraintNumber++;
+		st.append("+" + paths.get(i).getEdgeList().size() + " P"+ i + " <=");
+		for(int j=0; j<paths.get(i).getEdgeList().size(); j++)
+			st.append(" +" + paths.get(i).getEdgeList().get(j).name);
+		st.append(";\n");
+	}
+	
+	//constraint about each edge: Ei is enabled only if there is at least one enabled path that contains its.
+	for(Edge e: edges){
+		st.append("r_"+ constraintNumber + ":" + " " + e.name +" <="); constraintNumber++;
+		StringBuilder aux = new StringBuilder();
+		for(int j=0;j<paths.size();j++)	
+			if(paths.get(j).getEdgeList().contains(e))
+				aux.append(" +P"+ j);
+		if(aux.length() == 0)
+			st.append(" 0");
+		else
+			st.append(aux.toString());
+		st.append(";\n");
+	}
+	
+	/** Constraint about two-paths variables*/
+	for(int i=0; i<paths.size(); i++)
+		for(int j=i+1; j<paths.size(); j++){
+			int sharedEdge = amountSE(paths.get(i), paths.get(j));
+			if( sharedEdge > 0){		
+				st.append("r_"+ constraintNumber +":"); constraintNumber++;
+				st.append(" P" + i + " " + "+" + "P" + j + " <= +1 +P" + i + "P" + j + ";\n" );
+		
+			}
+		}
+	
+	/** Constraint about paths can share S edges two and two */
+	for(int i=0; i<paths.size(); i++)
+		for(int j=i+1; j<paths.size(); j++){
+			st.append("r_"+ constraintNumber +":" + sharedEdges(paths.get(i),paths.get(j)) + " P" + i + "P" + j + " <= " + MAX_SHARED_EDGES + " ;\n");
+			constraintNumber++;
+		}
+	
+	/**
+	 * Edges capacity constraints and link variable of enable edge(Ei) with variable of edge flow (ci)
+	 *  ci <= C(Ei) Ei where C(Ei) is capacity of Ci
+	 **/
+	for(Edge e: edges){	
+		if(!(e.capacity == Integer.MAX_VALUE)){
+			st.append("r_"+ constraintNumber + ": c" + e.name + " <= +" + e.capacity + " " + e.name + ";\n"); constraintNumber++;
+		}
+	}
+	
+	/***
+	 * Flow model constraint
+	 ***/
+	
+	//source node flow constraint
+	st.append("r_"+ constraintNumber + ": c =" + getOutflow(vertexs[0]) + ";\n"); constraintNumber++;
+	
+	//flow continuity constraint
+	for(int i=1; i<vertexs.length-1; i++){
+		st.append("r_"+ constraintNumber + ":" + getInflow(vertexs[i]) + " =" + getOutflow(vertexs[i]) + ";\n"); constraintNumber++;
+	}
+	//target node flow constraint
+	st.append("r_"+ constraintNumber + ": c =" + getInflow(vertexs[vertexs.length - 1]) + ";\n"); constraintNumber++;
+	
+	//the network capacity c is greater or equal to a minimum required capacity C
+	st.append("r_"+ constraintNumber + ": c >= " + REQUIRED_CAPACITY + ";\n"); constraintNumber++;
+	
+	//constraint that all variables are boolean.				
+	st.append("bin");
+	for(int i=0; i<paths.size();i++)
+		st.append(" P" + i + ",");
+
+	for(Edge e: edges)
+		st.append(" " + e.name + ",");
+	
+	
+	st.deleteCharAt(st.length()-1);		
+	st.append(";");
+
+	System.out.println(st.toString());
+	return st.toString();
+
+}
 	
 	private String getOutflow(Vertex vertex) {
 		StringBuilder st = new StringBuilder();
 		
-		for(int i=0; i<edges.length;i++)
-			if(edges[i].from.equals(vertex))
-				st.append(" +c" + i );
+		for(Edge e: edges)
+			if(e.from.equals(vertex))
+				st.append(" +c" + e.name );
 		
 		return (st.toString().isEmpty())? " 0": st.toString();			
 	}
@@ -396,9 +530,9 @@ public class DTNLpModel{
 	private String getInflow(Vertex vertex) {
 		StringBuilder st = new StringBuilder();
 		
-		for(int i=0; i<edges.length;i++)
-			if(edges[i].to.equals(vertex))
-				st.append(" +c" + i );
+		for(Edge e: edges)
+			if(e.to.equals(vertex))
+				st.append(" +c" + e.name );
 		
 		return (st.toString().isEmpty())? " 0": st.toString();
 			

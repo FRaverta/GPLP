@@ -66,7 +66,7 @@ public class WNMetrics extends Metrics {
 		shared_edges_average = calculateSharedEdgeAverage();		
 		this.paa1f = calculatePaa1f(g);
 		this.paa1fwc = calculatePaa1fwc(g);
-		Parameters.report.writeln(this.toString());		
+		Parameters.report.writeln(this.toHTML());		
 	}
 	
 	/**
@@ -144,6 +144,19 @@ public class WNMetrics extends Metrics {
 		return st.toString();
 	}
 	
+	public String toHTML(){
+		StringBuilder st = new StringBuilder();
+		
+		st.append(super.toHTML());
+		
+		st.append("Path availables after 1 failure in average " + paa1f + "<br/>");
+		st.append("Path availables after 1 failure in the worst case " + paa1fwc + "<br/>");	
+
+		st.append("----------------------------------------------------------<br/>");
+
+		return st.toString();
+	}
+	
 //	public static void main(String args[]){
 //		double A = 0.8;
 //		double B = 0.9;
@@ -157,7 +170,7 @@ public class WNMetrics extends Metrics {
 
 
 public List<GraphPath<Vertex, Edge>> getAllSinglePath(ListenableDirectedWeightedGraph<Vertex, Edge> g, Vertex source,Vertex target) {
-	return WNLpFormat.getAllSinglePath(g, source, target);
+	return WNLpModel.getAllSinglePath(g, source, target);
 }
 
 

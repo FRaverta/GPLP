@@ -4,14 +4,15 @@ import java.util.Observable;
 
 public class Report extends Observable{
 
-	private StringBuilder st;
+	private StringBuilder htmlSt;
 	
 	public Report(){
-		st = new StringBuilder();
+		htmlSt = new StringBuilder();		
+		htmlSt.append("<html> <P ALIGN=left>");		
 	}
 
 	public synchronized void write(String str){
-		st.append(str);
+		htmlSt.append(str);
 		setChanged();
 		notifyObservers();
 	}
@@ -22,12 +23,24 @@ public class Report extends Observable{
 //		notifyObservers();
 //	}
 
-	public synchronized String read(int from){
-		return st.substring(from);
+	public synchronized String readHtml(int from){
+		return htmlSt.substring(from);
 	}
 
 	public synchronized void writeln(String str) {
-		st.append(str + "\n");
+		htmlSt.append(str + "<br>");
+		setChanged();
+		notifyObservers();		
+	}
+	
+	public synchronized void writelnRed(String str) {
+		htmlSt.append("<font color=\"red\">" + str + "</font><br>");
+		setChanged();
+		notifyObservers();		
+	}
+
+	public synchronized void writelnGreen(String str) {
+		htmlSt.append("<font color=\"green\">" + str + "</font><br>");
 		setChanged();
 		notifyObservers();		
 	}
@@ -35,6 +48,18 @@ public class Report extends Observable{
 	public static void  main(String args[]){
 		System.out.println("OK");
 		System.exit(0);
+	}
+
+	//This method read an string and format as HTML
+	public void writeString(String str) {
+		int i = -1;
+		while((i=str.indexOf("\n")) != -1){
+			//purge \n and write into reporter in HTML format	
+			String aux = (i>0)? str.substring(0,i-1): "";
+			str = (i+1<str.length())?str.substring(i+1):"";
+			this.writeln(aux);
+		}
+		this.write(str);
 	}
 }
 

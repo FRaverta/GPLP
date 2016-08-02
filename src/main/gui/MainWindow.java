@@ -1,48 +1,67 @@
 package main.gui;
 
-import java.awt.Component;
+import java.awt.Color;
 import java.awt.EventQueue;
-
-import javax.swing.JFrame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import javax.swing.JPanel;
+import java.io.File;
+import java.io.IOException;
+
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.jgrapht.graph.ListenableDirectedGraph;
+import org.jgrapht.graph.ListenableDirectedWeightedGraph;
+import org.xml.sax.SAXException;
 
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import javax.swing.JTextArea;
-import java.awt.Color;
-import javax.swing.JButton;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+import main.Parameters;
+import main.util.Edge;
+import main.util.Vertex;
+import main.util.XMLGraphParser.GraphXMLExporter;
+import main.util.XMLGraphParser.XMLGraphParser;
 
-@Deprecated
-class MainWindow {
+public class MainWindow {
 
-	private JFrame frame;
-	private JTextField edges_density;
-	private JTextField amount_of_nodes;
-	private JTextField required_path;
-	private JTextField max_weight_edge;
-	private JGraphAdapterDemo graph_up;
-	private JGraphAdapterDemo graph_down;
-	private final Controller controller;
+	private Controller controller;
+	private JGraphAdapterDemo  rightUpGraph,rightDownGraph;
+	protected JFrame frame;
+	private NewSampleWindow sampleWindow;
+	private LoadAndSetModelWindow loadAndSetModelWindow;
+	private SaveGraphWindow saveGraphWindow;
+	private StudyCasesWindow studyCasesWindow;
+	private ModelParametersWindow modelParametersWindow;
 	
-	private JPanel panel_4,panel_5;
-	//	/**
-//	 * Launch the application.
-//	 */
+	
+	/**
+	 * This variables are used when a new model is required from a graph. These indicates which model should be generated 
+	 */
+	protected boolean wnModel = false;
+	protected boolean dtnModel = false;	
+
+	
+	/**
+	 * Launch the application.
+	 */
 //	public static void main(String[] args) {
 //		EventQueue.invokeLater(new Runnable() {
 //			public void run() {
 //				try {
-//					MainWindow window = new MainWindow();
+//					NewWindow window = new NewWindow();
 //					window.frame.setVisible(true);
+//					
 //				} catch (Exception e) {
 //					e.printStackTrace();
 //				}
@@ -52,182 +71,451 @@ class MainWindow {
 
 	/**
 	 * Create the application.
+	 * @param resultGraph 
+	 * @param graph 
 	 */
-	public MainWindow(int edges_density, int amount_of_nodes, int max_weight_edge , int required_path,ListenableDirectedGraph graph_up,ListenableDirectedGraph graph_down,Controller controller) {
-		this.graph_up   = new  JGraphAdapterDemo();
-		this.graph_down = new  JGraphAdapterDemo();
-		this.graph_up.init(graph_up);
-		this.graph_down.init(graph_down);
-		
-		this.controller = controller;
-		
-		initialize();
-		
-		this.edges_density.setText(Integer.toString(edges_density));
-		this.amount_of_nodes.setText(Integer.toString(amount_of_nodes));
-		this.max_weight_edge.setText(Integer.toString(max_weight_edge));
-		this.required_path.setText(Integer.toString(required_path));
-
-		
+	public MainWindow(Controller ctr, ListenableDirectedWeightedGraph<Vertex, Edge> graph, ListenableDirectedWeightedGraph<Vertex, Edge> resultGraph) {
+		controller = ctr;
+		initialize(graph,resultGraph);
 		frame.setVisible(true);
-	}
 
+	}
 	/**
 	 * Initialize the contents of the frame.
+	 * @param resultGraph 
+	 * @param graph 
 	 */
-	private void initialize() {
+	private void initialize(ListenableDirectedWeightedGraph<Vertex, Edge> graph, ListenableDirectedWeightedGraph<Vertex, Edge> resultGraph) {
 		frame = new JFrame();
-		frame.addComponentListener(new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent e) {
-				System.out.println("frame");
-				JFrame frame = (JFrame) e.getComponent();
-				
-				for (Component c :frame.getContentPane().getComponents())
-					c.dispatchEvent(e);
-				
-			}
-		});
-		frame.addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosed(WindowEvent e) {
-			}
-		});
-		frame.setBounds(100, 100, 450, 300);
+		frame.setSize(600, 600);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().setLayout(null);
-		
-		JPanel panel = new JPanel();
-		panel.addComponentListener(new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent e) {
-				System.out.println("OK");
-				int width = frame.getWidth();
-				int height = frame.getHeight();
+		frame.setTitle("GPLP");
+		 //leftPanel.setBackground(Color.red);
 				
-				panel.setSize((40*width)/100,height);
-			}
-		});
-		panel.setBounds(0, 0, 186, 271);
-		frame.getContentPane().add(panel);
-		panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+		
+		//UpPanel
+		JMenuBar  upPanel = new JMenuBar(); 
+		upPanel.setBackground(Color.orange); 
+		//upPanel.setLayout(new BoxLayout(upPanel,BoxLayout.X_AXIS)); 		
+		JMenu menu = new JMenu("Menu"); 
+		
+		{
+		//boton new
+		JMenuItem newItem = new JMenuItem("Load graph & set model");
+		menu.add(newItem);upPanel.add(menu);
+		newItem.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent e){				
+					loadAndSetModelWindow.setVisible(true);
+					
+				}
+			});
+		}
+		
+		{
+		//boton new
+		JMenuItem newItem = new JMenuItem("New random model");
+		menu.add(newItem);upPanel.add(menu);
+		newItem.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent e){				
+					sampleWindow.setVisible(true);
+					
+				}
+			});
+		}
+		
+		{
+		//boton load tree topology
+		JMenuItem newItem = new JMenuItem("Run a study case");
+		menu.add(newItem);upPanel.add(menu);
+		newItem.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent e){				
+					studyCasesWindow.setVisible(true);
+				}
+			});
+		}
+		
+		{
+		//boton load tree topology
+		JMenuItem newItem = new JMenuItem("Run DTN");
+		menu.add(newItem);upPanel.add(menu);
+		newItem.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent e){				
+					controller.runDTN();
+				}
+			});
+		}
+		
+		{
+		//boton load tree topology
+		JMenuItem newItem = new JMenuItem("Run DTN MultiFlow");
+		menu.add(newItem);upPanel.add(menu);
+		newItem.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent e){				
+					controller.runDTNMultiFlow();
+				}
+			});
+		}
+
+		{
+		//boton load tree topology
+		JMenuItem newItem = new JMenuItem("Save original graph");
+		menu.add(newItem);upPanel.add(menu);
+		newItem.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent e){				
+					saveGraphWindow.setWichGraphSave(true);
+					saveGraphWindow.setVisible(true);
+				}
+			});
+		}
+		
+		{
+		//boton load tree topology
+		JMenuItem newItem = new JMenuItem("Save result graph");
+		menu.add(newItem);upPanel.add(menu);
+		newItem.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent e){		
+					saveGraphWindow.setWichGraphSave(false);
+					saveGraphWindow.setVisible(true);
+				}
+			});
+		}
+
+		
+//		{
+//		//boton load tree topology
+//		JMenuItem newItem = new JMenuItem("Load Tree Topology");
+//		menu.add(newItem);upPanel.add(menu);
+//		newItem.addActionListener(new ActionListener(){
+//				public void actionPerformed(ActionEvent e){				
+//					controller.loadExample1(false);
+//					
+//				}
+//			});
+//		}
+//		{
+//		//boton load tree topology
+//		JMenuItem newItem = new JMenuItem("Load example 2");
+//		menu.add(newItem);upPanel.add(menu);
+//		newItem.addActionListener(new ActionListener(){
+//				public void actionPerformed(ActionEvent e){				
+//					controller.loadExample2(false);
+//					
+//				}
+//			});
+//		}
+//		
+//		{
+//		//boton load tree topology
+//		JMenuItem newItem = new JMenuItem("Load Tree Topology pse");
+//		menu.add(newItem);upPanel.add(menu);
+//		newItem.addActionListener(new ActionListener(){
+//				public void actionPerformed(ActionEvent e){				
+//					controller.loadExample1(true);
+//					
+//				}
+//			});
+//		}
+//		
+//		{
+//		//boton load tree topology
+//		JMenuItem newItem = new JMenuItem("Load example 2 pse");
+//		menu.add(newItem);upPanel.add(menu);
+//		newItem.addActionListener(new ActionListener(){
+//				public void actionPerformed(ActionEvent e){				
+//					controller.loadExample2(true);
+//					
+//				}
+//			});
+//		}
+//		
+//		{
+//		//boton load tree topology
+//		JMenuItem newItem = new JMenuItem("Load default example");
+//		menu.add(newItem);upPanel.add(menu);
+//		newItem.addActionListener(new ActionListener(){
+//				public void actionPerformed(ActionEvent e){				
+//					controller.loadDefault(false);
+//					
+//				}
+//			});
+//		}
+//		
+//		{
+//		//boton load tree topology
+//		JMenuItem newItem = new JMenuItem("Load default example pse");
+//		menu.add(newItem);upPanel.add(menu);
+//		newItem.addActionListener(new ActionListener(){
+//				public void actionPerformed(ActionEvent e){				
+//					controller.loadDefault(true);
+//					
+//				}
+//			});
+//		}
 		
 		
-		JPanel panel_2 = new JPanel();
-		panel_2.setBounds(0, 0, 186, 135);
-		panel.add(panel_2);
-		panel_2.setLayout(null);
+		//leftPanel
+		ReportPanel  leftPanel = new ReportPanel();
 		
-		JLabel lblGraphGeneration = new JLabel("Graph Generation");
-		lblGraphGeneration.setBounds(12, 12, 141, 15);
-		panel_2.add(lblGraphGeneration);
+		//rightUpPanel
+		rightUpGraph =new JGraphAdapterDemo(); //rightUpPanel.setBackground(Color.blue);
+		rightUpGraph.init(graph);
 		
-		JLabel lblEdgesDensity = new JLabel("Edges Density");
-		lblEdgesDensity.setBounds(7, 72, 108, 17);
-		panel_2.add(lblEdgesDensity);
+		//rightUpPanel
+		rightDownGraph =new JGraphAdapterDemo(); //rightUpPanel.setBackground(Color.blue);
+		rightDownGraph.init(resultGraph);
 		
-		edges_density = new JTextField();
-		edges_density.setBounds(136, 71, 38, 19);
-		panel_2.add(edges_density);
-		edges_density.setColumns(10);
+		frame.setLayout(new GridBagLayout());
+		GridBagConstraints gbc = new GridBagConstraints();
 		
-		JLabel label = new JLabel("Amount of Nodes");
-		label.setBounds(7, 39, 133, 17);
-		panel_2.add(label);
+//		gbc.gridx = 0;
+//		gbc.gridy = 0;
+//		//numer of column
+//		gbc.gridwidth  = 2;
+//		//number of rows
+//		gbc.gridheight = 1;
+//		gbc.weightx = 0.5;
+//		gbc.weighty = 0.0;
+//		gbc.fill = GridBagConstraints.HORIZONTAL;
+		frame.setJMenuBar(upPanel);
 		
-		amount_of_nodes = new JTextField();
-		amount_of_nodes.setColumns(10);
-		amount_of_nodes.setBounds(136, 40, 38, 19);
-		panel_2.add(amount_of_nodes);
+		gbc.gridx = 0;
+		gbc.gridy = 1;
+		gbc.gridwidth  = 1;
+		gbc.gridheight = 2;
+		gbc.weightx = 0.5;
+		gbc.weighty = 1;
+		gbc.fill = GridBagConstraints.BOTH;
+		frame.add(leftPanel.scrollPane,gbc);
 		
-		JLabel label_3 = new JLabel("Max Weight Edge");
-		label_3.setBounds(7, 101, 123, 17);
-		panel_2.add(label_3);
+		gbc.gridx = 1;
+		gbc.gridy = 1;
+		gbc.gridwidth  = 1;
+		gbc.gridheight = 1;
+		gbc.weightx = 1;
+		gbc.weighty = 1;
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.insets = new Insets( 0,2,10,0 );
+		frame.add(rightUpGraph,gbc);
 		
-		max_weight_edge = new JTextField();
-		max_weight_edge.setColumns(10);
-		max_weight_edge.setBounds(136, 101, 38, 19);
-		panel_2.add(max_weight_edge);
+		gbc.gridx = 1;
+		gbc.gridy = 2;
+		gbc.gridwidth  = 1;
+		gbc.gridheight = 1;
+		gbc.weightx = 1;
+		gbc.weighty = 1;
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.insets = new Insets( 10,2,1,0 );
+		frame.add(rightDownGraph,gbc);	
 		
-		JPanel panel_3 = new JPanel();
-		panel_3.setBounds(0, 135, 186, 135);
-		panel.add(panel_3);
-		panel_3.setLayout(null);
+		//Jdialog
+		this.sampleWindow = new NewSampleWindow(this);
+		this.studyCasesWindow = new StudyCasesWindow(this);
+		this.loadAndSetModelWindow = new LoadAndSetModelWindow(this);
+		this.saveGraphWindow = new SaveGraphWindow(this);
 		
-		JLabel label_1 = new JLabel("Model Parameters");
-		label_1.setBounds(24, 5, 150, 15);
-		panel_3.add(label_1);
-		
-		required_path = new JTextField();
-		required_path.setColumns(10);
-		required_path.setBounds(136, 32, 38, 19);
-		panel_3.add(required_path);
-		
-		JLabel label_2 = new JLabel("Required Paths");
-		label_2.setBounds(7, 32, 133, 17);
-		panel_3.add(label_2);
-		
-		JButton btnCalcular = new JButton("Calcular");
-		btnCalcular.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				btnCalcular.setEnabled(false);
-				controller.solveNewModel(Integer.parseInt(amount_of_nodes.getText()), Integer.parseInt(edges_density.getText()),Integer.parseInt(required_path.getText()) , Integer.parseInt(max_weight_edge.getText()));
-				btnCalcular.setEnabled(true);
-			}
-		});
-		btnCalcular.setBounds(41, 98, 117, 25);
-		panel_3.add(btnCalcular);
-		
-		JPanel panel_1 = new JPanel();
-		panel_1.addComponentListener(new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent e) {
-				System.out.println("paneeeeellll");
-				int width = frame.getWidth();
-				int height = frame.getHeight();
-				
-				panel_1.setBounds((40*width)/100,0,(60*width)/100,height);
-			}
-		});
-		panel_1.setBounds(188, 0, 260, 271);
-		frame.getContentPane().add(panel_1);
-		panel_1.setLayout(new BoxLayout(panel_1, BoxLayout.Y_AXIS));
-		
-		panel_4 = new JPanel();
-		panel_1.add(panel_4);
-		
-		//@Nando
-//		JGraphAdapterDemo demo = new JGraphAdapterDemo();
-//		demo.init(graph_up);
-		panel_4.add(graph_up);
-		
-		panel_5 = new JPanel();
-		panel_1.add(panel_5);
-		
-		//@Nando
-//		JGraphAdapterDemo demo_5 = new JGraphAdapterDemo();
-//		demo_5.init(graph_down);
-		panel_5.add(graph_down);
+	     frame.addWindowListener(new WindowAdapter() {
+	          public void windowClosing(WindowEvent e) {
+	              sampleWindow.dispose();
+	              studyCasesWindow.dispose();
+	              System.out.println("a");
+	          }
+	     });
 	}
 	
 	public void setGraphs(ListenableDirectedGraph graph_up,ListenableDirectedGraph graph_down){
-		this.graph_up = new JGraphAdapterDemo();
-		this.graph_down = new JGraphAdapterDemo();
-		
-		this.graph_up.init(graph_up);
-		this.graph_down.init(graph_down);
-		
-		panel_4.removeAll();
-		panel_5.removeAll();
-		
-		panel_4.add(this.graph_up);
-		panel_5.add(this.graph_down);
+		GridBagConstraints gbc = new GridBagConstraints();
 
-		panel_4.revalidate();
-		panel_4.repaint();
+		frame.remove(rightUpGraph);
+		frame.remove(rightDownGraph);
 		
-		panel_5.revalidate();
-		panel_5.repaint();
+		this.rightUpGraph = new JGraphAdapterDemo();
+		this.rightDownGraph = new JGraphAdapterDemo();
+		
+		this.rightUpGraph.init(graph_up);
+		this.rightDownGraph.init(graph_down);
+		
+		
+		gbc.gridx = 1;
+		gbc.gridy = 1;
+		gbc.gridwidth  = 1;
+		gbc.gridheight = 1;
+		gbc.weightx = 1;
+		gbc.weighty = 1;
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.insets = new Insets( 0,2,10,0 );
+		frame.add(rightUpGraph,gbc);
+		
+		gbc.gridx = 1;
+		gbc.gridy = 2;
+		gbc.gridwidth  = 1;
+		gbc.gridheight = 1;
+		gbc.weightx = 1;
+		gbc.weighty = 1;
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.insets = new Insets( 10,2,1,0 );
+		frame.add(rightDownGraph,gbc);		
+		
+		frame.revalidate();
+		frame.repaint();
+
 		
 	}
+	public void hideSampleWindow() {
+		this.sampleWindow.setVisible(false);
+	}
+	
+	/**
+	 *Call only if a  cancel button of ModelParametersWindow 
+	 * */
+	public void hideModelParametersWindow() {
+		this.modelParametersWindow.setVisible(false);
+	}
+	
+	public void hideStudyCaseWindow() {
+		this.studyCasesWindow.setVisible(false);
+	}
+	
+	public void hideLoadAndSetModelWindow() {
+		this.loadAndSetModelWindow.setVisible(false);
+	}
+	
+	public void solveNewModel(int amount_of_vertex,int edge_density,int amount_of_path,int max_weight_edge){
+		sampleWindow.setVisible(false);
+		this.frame.getJMenuBar().getMenu(0).setEnabled(false);
+		controller.solveNewModel(amount_of_vertex, edge_density, amount_of_path, max_weight_edge);
+	}
+	
+	public void solveStudyCase(int studyCase,int sharedEdgeOption, double sharedEdegeWeighing){
+		studyCasesWindow.setVisible(false);
+		this.frame.getJMenuBar().getMenu(0).setEnabled(false);
+		switch (studyCase) {
+			case 0 : controller.loadDefault((sharedEdgeOption==2)?true:false,sharedEdegeWeighing); break;
+			case 1 : controller.loadExample1((sharedEdgeOption==2)?true:false,sharedEdegeWeighing); break;
+			case 2 : controller.loadExample3((sharedEdgeOption==2)?true:false,sharedEdegeWeighing); break;
+		}		
+	}
+	
+
+	public void activeMenu(){
+		this.frame.getJMenuBar().getMenu(0).setEnabled(true);
+	}
+
+	public void desactiveMenu(){
+		this.frame.getJMenuBar().getMenu(0).setEnabled(false);
+	}
+	
+	public void loadGraphAndSolveModel(String path, int selectedIndex) {
+		try{
+			desactiveMenu();
+			File f = new File(path);
+			if(!f.exists()) { 
+			    Parameters.report.writelnRed("Eror in read graph: The file " + path +" doesn't exist.");
+			    loadAndSetModelWindow.setVisible(false);
+			}
+			else if(f.isDirectory()) { 
+			    Parameters.report.writelnRed("Eror in read graph: " + path + " is a directory.");
+			    loadAndSetModelWindow.setVisible(false);
+			}else{
+					//generate graph
+					ListenableDirectedWeightedGraph<Vertex, Edge> graph = XMLGraphParser.parseXMLGraph(f);
+					switch(selectedIndex){
+						case 0:
+					
+								///put chosen to true and others to false TODO
+								this.wnModel = true;
+								this.dtnModel = false;
+								//look up the window for enter model parameters
+								modelParametersWindow = new ModelParametersWindow(this,false,false,graph);
+								loadAndSetModelWindow.setVisible(false);
+								modelParametersWindow.setVisible(true);
+								//generate an solve lpmodel	
+			//					controller.runWNFromGraph(graph, 1, true);
+								break;
+								
+						case 1:
+							///put chosen to true and others to false TODO
+							this.dtnModel = true;
+							this.wnModel = false;
+							//look up the window for enter model parameters
+							modelParametersWindow = new ModelParametersWindow(this,true,true,graph);
+							loadAndSetModelWindow.setVisible(false);
+							modelParametersWindow.setVisible(true);
+							//generate an solve lpmodel	
+		//					controller.runWNFromGraph(graph, 1, true);
+							break;
+				}
+			}
+		}catch(NullPointerException e){
+			Parameters.report.writelnRed("Eror in read graph: A path to file is required.");
+			loadAndSetModelWindow.setVisible(false);
+		} catch (ParserConfigurationException|SAXException|IOException e) {
+			Parameters.report.writelnRed("Eror parsing graph: " + e.toString());
+			loadAndSetModelWindow.setVisible(false);
+		}
+		finally{activeMenu();}
+	}
+	
+	public void runWNModel(ListenableDirectedWeightedGraph<Vertex, Edge> graph, Vertex[] vertexs, int requiredPath){
+		modelParametersWindow.setVisible(false);
+		controller.runWNFromGraph(graph, vertexs, requiredPath);
+	}
+	
+	public void saveResultGraph(String path) {
+		try{
+			desactiveMenu();
+		    saveGraphWindow.setVisible(false);
+			File f = new File(path);
+			if(f.exists()) { 
+			    Parameters.report.writelnRed("Eror in save graph: The file " + path +" is already exist.");
+			}
+			else if(f.isDirectory()) { 
+			    Parameters.report.writelnRed("Eror in save graph: " + path + " is a directory.");
+			}else
+					try{controller.saveResultGraph(f);Parameters.report.writelnGreen("The result graph was saved succesfully."); }
+					catch(IOException e){Parameters.report.writelnRed("Error saving graph: " + e.toString());}
+			
+		
+		}catch(NullPointerException e){
+			Parameters.report.writelnRed("Eror in save graph: A path is required.");
+			loadAndSetModelWindow.setVisible(false);
+		}
+		finally{activeMenu();}
+	}
+	
+	public void saveGraph(String path) {
+		try{
+			desactiveMenu();
+		    saveGraphWindow.setVisible(false);
+			File f = new File(path);
+			if(f.exists()) { 
+			    Parameters.report.writelnRed("Eror in save graph: The file " + path +" is already exist.");
+			}
+			else if(f.isDirectory()) { 
+			    Parameters.report.writelnRed("Eror in save graph: " + path + " is a directory.");
+			}else
+					try{controller.saveGraph(f);Parameters.report.writelnGreen("The graph was saved succesfully."); }
+					catch(IOException e){Parameters.report.writelnRed("Error saving graph: " + e.toString());}
+			
+		
+		}catch(NullPointerException e){
+			Parameters.report.writelnRed("Eror in save graph: A path is required.");
+			loadAndSetModelWindow.setVisible(false);
+		}
+		finally{activeMenu();}
+	}
+	
+	public void hideGraphWindow() {
+		this.saveGraphWindow.setVisible(false);
+	}
+	
+	public void runDTNModel(ListenableDirectedWeightedGraph<Vertex, Edge> graph, Vertex[] nodeList, int requiredPath, Integer requiredCapacity, Integer maxSharedEdges) {
+		controller.runDTNFromGraph(graph, nodeList, requiredPath, requiredCapacity,maxSharedEdges);
+		modelParametersWindow.setVisible(false);
+		
+		
+		
+	}
+
+	
+
 }

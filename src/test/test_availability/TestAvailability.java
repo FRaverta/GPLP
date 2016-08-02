@@ -15,7 +15,7 @@ import main.Parameters;
 import main.lpModel.wireNet.WNMetrics;
 import main.util.Edge;
 import main.util.Vertex;
-import main.util.XMLGraphParser.GraphHandler;
+import main.util.XMLGraphParser.XMLGraphParser;
 
 
 /**
@@ -49,7 +49,7 @@ public class TestAvailability {
 	public void test3(){
         ListenableDirectedWeightedGraph<Vertex, Edge> graph;
 		try {
-			graph = GraphHandler.parseXMLGraph("/home/nando/development/Doctorado/Ej1/src/test/test_availability/data/g1.graphml");
+			graph = XMLGraphParser.parseXMLGraph("/home/nando/development/Doctorado/Ej1/src/test/test_availability/data/g1.graphml");
 	        Vertex source = getNode(graph,"n0");
 	        Vertex target = getNode(graph,"n2");
 			WNMetrics dummyObject = new WNMetrics();
@@ -68,7 +68,7 @@ public class TestAvailability {
 	public void test4(){
         ListenableDirectedWeightedGraph<Vertex, Edge> graph;
 		try {
-			graph = GraphHandler.parseXMLGraph("/home/nando/development/Doctorado/Ej1/src/test/test_availability/data/g3.graphml");
+			graph = XMLGraphParser.parseXMLGraph("/home/nando/development/Doctorado/Ej1/src/test/test_availability/data/g3.graphml");
 	        Vertex source = getNode(graph,"n0");
 	        Vertex target = getNode(graph,"n3");
 			WNMetrics dummyObject = new WNMetrics();
@@ -87,7 +87,7 @@ public class TestAvailability {
 	public void test5(){
         ListenableDirectedWeightedGraph<Vertex, Edge> graph;
 		try {
-			graph = GraphHandler.parseXMLGraph("/home/nando/development/Doctorado/Ej1/src/test/test_availability/data/g4.graphml");
+			graph = XMLGraphParser.parseXMLGraph("/home/nando/development/Doctorado/Ej1/src/test/test_availability/data/g4.graphml");
 	        Vertex source = getNode(graph,"n0");
 	        Vertex target = getNode(graph,"n3");
 			WNMetrics dummyObject = new WNMetrics();
@@ -106,7 +106,7 @@ public class TestAvailability {
 	public void test6(){
         ListenableDirectedWeightedGraph<Vertex, Edge> graph;
 		try {
-			graph = GraphHandler.parseXMLGraph("/home/nando/development/Doctorado/Ej1/src/test/test_availability/data/g5.graphml");
+			graph = XMLGraphParser.parseXMLGraph("/home/nando/development/Doctorado/Ej1/src/test/test_availability/data/g5.graphml");
 	        Vertex source = getNode(graph,"n0");
 	        Vertex target = getNode(graph,"n3");
 			WNMetrics dummyObject = new WNMetrics();
@@ -125,7 +125,7 @@ public class TestAvailability {
 	public void test7(){
         ListenableDirectedWeightedGraph<Vertex, Edge> graph;
 		try {
-			graph = GraphHandler.parseXMLGraph("/home/nando/development/Doctorado/Ej1/src/test/test_availability/data/g14.graphml");
+			graph = XMLGraphParser.parseXMLGraph("/home/nando/development/Doctorado/Ej1/src/test/test_availability/data/g14.graphml");
 	        Vertex source = getNode(graph,"n0");
 	        Vertex target = getNode(graph,"n2");
 	        if(source==null || target==null )
