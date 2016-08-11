@@ -135,7 +135,7 @@ public class WNMetrics extends Metrics {
 		StringBuilder st = new StringBuilder();
 		
 		st.append(super.toString());
-		
+		st.append("Shared edges average " + shared_edges_average + "\n");
 		st.append("Path availables after 1 failure in average " + paa1f + "\n");
 		st.append("Path availables after 1 failure in the worst case " + paa1fwc + "\n");	
 
@@ -148,7 +148,7 @@ public class WNMetrics extends Metrics {
 		StringBuilder st = new StringBuilder();
 		
 		st.append(super.toHTML());
-		
+		st.append("Shared edges average " + shared_edges_average + "<br/>");
 		st.append("Path availables after 1 failure in average " + paa1f + "<br/>");
 		st.append("Path availables after 1 failure in the worst case " + paa1fwc + "<br/>");	
 

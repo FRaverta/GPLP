@@ -6,6 +6,7 @@ import java.awt.Font;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JTextField;
@@ -13,6 +14,7 @@ import javax.swing.JLabel;
 import javax.swing.JComboBox;
 import javax.swing.ImageIcon;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.awt.event.ActionEvent;
 
 public class LoadAndSetModelWindow extends JDialog {
@@ -52,28 +54,43 @@ public class LoadAndSetModelWindow extends JDialog {
 		contentPanel.setLayout(null);
 		
 		filePathTextField = new JTextField();
-		filePathTextField.setBounds(69, 25, 579, 39);
+		filePathTextField.setBounds(56, 23, 579, 39);
 		contentPanel.add(filePathTextField);
 		filePathTextField.setColumns(10);
 		filePathTextField.setFont(new Font("Serif",Font.PLAIN,20));
 		
 		JLabel lblFile = new JLabel("File");
-		lblFile.setBounds(25, 37, 70, 15);
+		lblFile.setBounds(12, 37, 70, 15);
 		contentPanel.add(lblFile);
 		
 		JComboBox modelBox = new JComboBox(modelList);
-		modelBox.setBounds(91, 76, 532, 33);
+		modelBox.setBounds(88, 74, 547, 33);
 		contentPanel.add(modelBox);
 		
 		JLabel lblModel = new JLabel("Model");
-		lblModel.setBounds(25, 85, 70, 15);
+		lblModel.setBounds(12, 83, 70, 15);
 		contentPanel.add(lblModel);
 		
 		JLabel lblNewLabel = new JLabel();
 		lblNewLabel.setToolTipText("Here there will be a small description about the choosed model + .... ...  and so on...");
 		lblNewLabel.setIcon(new ImageIcon(LoadAndSetModelWindow.class.getResource("/main/gui/resources/helpIcon25.png")));
-		lblNewLabel.setBounds(646, 76, 40, 33);
+		lblNewLabel.setBounds(660, 76, 40, 33);
 		contentPanel.add(lblNewLabel);
+		
+		JButton btnNewButton = new JButton();
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				 JFileChooser fc = new JFileChooser();
+				  int returnVal = fc.showOpenDialog(LoadAndSetModelWindow.this);
+		        if (returnVal == JFileChooser.APPROVE_OPTION) {
+		            File file = fc.getSelectedFile();
+		            LoadAndSetModelWindow.this.filePathTextField.setText(file.getAbsolutePath());
+		        }
+			}
+		});
+		btnNewButton.setIcon(new ImageIcon(LoadAndSetModelWindow.class.getResource("/main/gui/resources/openFileIcon.png")));
+		btnNewButton.setBounds(647, 31, 39, 30);
+		contentPanel.add(btnNewButton);
 		{
 			JPanel buttonPane = new JPanel();
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));

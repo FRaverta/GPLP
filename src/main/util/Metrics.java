@@ -110,8 +110,9 @@ public abstract class Metrics {
 		
 		for(Edge e: g.edgeSet()){
 			//add each edge from g to aux with capacity as weight
-			aux.addEdge(e.from, e.to, e);
-			aux.setEdgeWeight(e, e.capacity);			
+			Edge eCopy = new Edge(e.name,e.from,e.to,e.capacity);
+			aux.addEdge(eCopy.from, eCopy.to, eCopy);
+			aux.setEdgeWeight(eCopy, eCopy.weight);			
 		}
 		
 		EdmondsKarpMaximumFlow<Vertex,Edge> maxFlowCalculator = new EdmondsKarpMaximumFlow<Vertex,Edge>(aux);

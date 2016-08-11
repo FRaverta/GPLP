@@ -1,6 +1,7 @@
 package main.lpModel.wireNet;
 import lpsolve.*;
 import main.Parameters;
+import main.lpModel.LpModel;
 import main.util.Edge;
 import main.util.Pair;
 import main.util.Vertex;
@@ -22,7 +23,7 @@ import org.jgrapht.alg.AllDirectedPaths;
  * for a wire network.
  * 
  * */
-public class WNLpModel{
+public class WNLpModel extends LpModel{
 	
 	private static final int MAX_ATTEMPT_RANDOM_GRAPH = 5000;
 
@@ -217,20 +218,22 @@ public class WNLpModel{
 	    //Solve lp model	
     	LpSolve solver = LpSolve.readLp(tempFile.getCanonicalFile().getAbsolutePath(),1,"");
     	int solverResult = solver.solve();
-    	System.out.println("Solver Result= " + solverResult ) ;
+    	System.out.println("Solver Result= " + solverResult );
+    	Parameters.report.writeString(solveResultHTMLMessage(solverResult));
 
 	      
 	      ListenableDirectedWeightedGraph<Vertex,Edge> resultGraph = generateGraphFromSolution(solver.getPtrVariables());
 	      
-
-	      
-	      Parameters.report.writeln("The Lp model was solved: ");
-	      // print solution
-	      Parameters.report.writeln("Value of objective function: " + solver.getObjective());
-	      double[] var = solver.getPtrVariables();		     
-	      for (int i = 0; i < var.length; i++) {
-	    	  Parameters.report.writeln("Value of var[" + solver.getColName(i+1) + "] = " + var[i]);
-	      }
+	      if(solverResult==0 || solverResult==1){
+		      
+		      Parameters.report.writeln("The Lp model was solved: ");
+		      // print solution
+		      Parameters.report.writeln("Value of objective function: " + solver.getObjective());
+		      double[] var = solver.getPtrVariables();		     
+		      for (int i = 0; i < var.length; i++) {
+		    	  Parameters.report.writeln("Value of var[" + solver.getColName(i+1) + "] = " + var[i]);
+		      }
+		}	
 
 	      // delete the problem and free memory
 	      solver.deleteLp();

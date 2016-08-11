@@ -15,6 +15,7 @@ import org.jgrapht.graph.ListenableDirectedWeightedGraph;
 import lpsolve.LpSolve;
 import lpsolve.LpSolveException;
 import main.Parameters;
+import main.lpModel.LpModel;
 import main.lpModel.dtNet.dtnParser.parser;
 import main.lpModel.wireNet.WNMetrics;
 import main.lpModel.wireNet.WNLpModel;
@@ -22,7 +23,7 @@ import main.util.Edge;
 import main.util.Pair;
 import main.util.Vertex;
 
-public class DTNLpModel{
+public class DTNLpModel extends LpModel{
 
 	/** Amount of graph's vertexs */
 	public final int AMOUNT_OF_VERTEX;
@@ -135,6 +136,8 @@ public class DTNLpModel{
 		return resultGraph;
 	}
 	
+	
+	
 	/**
 	 * Solve current Linnear Programming model. 
 	 * 
@@ -165,6 +168,7 @@ public class DTNLpModel{
     	LpSolve solver = LpSolve.readLp(tempFile.getCanonicalFile().getAbsolutePath(),1,"");
     	int solverResult = solver.solve();
     	System.out.println("Solver Result= " + solverResult ) ;
+    	Parameters.report.writeString(solveResultHTMLMessage(solverResult));
 
 //    	solverResult = solver.solve();
 //    	System.out.println("Solver Result= " + solverResult ) ;
@@ -174,16 +178,16 @@ public class DTNLpModel{
 	      
 	      ListenableDirectedWeightedGraph<Vertex,Edge> resultGraph = generateGraphFromSolution(solver);
 	      
-
-	      
-	      Parameters.report.writeln("The Lp model was solved: ");
-	      // print solution
-	      Parameters.report.writeln("Value of objective function: " + solver.getObjective());
-	      double[] var = solver.getPtrVariables();		     
-	      for (int i = 0; i < var.length; i++) {
-	    	  Parameters.report.writeln("Value of var[" + solver.getColName(i+1) + "] = " + var[i]);
+	      if(solverResult==0 || solverResult==1){
+		      
+		      Parameters.report.writeln("The Lp model was solved: ");
+		      // print solution
+		      Parameters.report.writeln("Value of objective function: " + solver.getObjective());
+		      double[] var = solver.getPtrVariables();		     
+		      for (int i = 0; i < var.length; i++) {
+		    	  Parameters.report.writeln("Value of var[" + solver.getColName(i+1) + "] = " + var[i]);
+		      }
 	      }
-
 	      // delete the problem and free memory
 	      solver.deleteLp();
 	      return new Pair<Integer,ListenableDirectedWeightedGraph<Vertex,Edge>>(solverResult,resultGraph);
@@ -581,74 +585,74 @@ public class DTNLpModel{
 		return result;
 	}
 	
-	public static void main(String[] args) throws LpSolveException, IOException{		
-		Parameters.report.writeln("Creating LP Model\n. . .");
-		
-		String prefix = "lpmodel";
-	    String suffix = ".tmp";
-	    
-	    File tempFile = File.createTempFile(prefix, suffix);
-	    tempFile.deleteOnExit();
-	    
-	    FileWriter writer = new FileWriter(tempFile);
-	    
-		StringBuilder st = new StringBuilder();
-		
-		st.append("min: +x0 +x1 +x2 +x3 ;\n");
-		
-
-		
-		int constraintNumber=1;
-		
-		//amount of path constraint
-		st.append("r_" + constraintNumber + ": 1 <= +x0 +x1 +x2 +x3 ;\n"); constraintNumber++;
-		st.append("\n" + "bin x0, x1, x2, x3 ;");
-		
-		System.out.println(st.toString());
-	    String stringLpModel = st.toString(); 
-	    writer.append(stringLpModel);
-	    
-		Parameters.report.writeln("The LP model has been created: ");
-		Parameters.report.writeln(stringLpModel);
-	    
-	    writer.flush();
-	    writer.close();
-
-		Parameters.report.writeln("Solving Lp Model\n. . .");
-
-	    
-	    //Solve lp model	
-    	LpSolve solver = LpSolve.readLp("/home/nando/Desktop/a.lp",1,"");
-//    	solver.strSetObjFn("0.1");
-//    	int solverResult = solver.solve();
-//    	System.out.println("Solver Result= " + solverResult ) ;
-
-//    	solverResult = solver.solve();
-//    	System.out.println("Solver Result= " + solverResult ) ;
-//    	
-//    	solverResult = solver.solve();
-//    	System.out.println("Solver Result= " + solverResult ) ;
-	      	      
-
-	      
-	      Parameters.report.writeln("The Lp model was solved: ");
-	      // print solution
-	      for(int j=0; j<10; j++){
-	    	  System.out.println("***************************** Solution " + j +" *****************************");
-	    	  int solverResult = solver.solve();
-	    	  System.out.println("Solver Result= " + solverResult ) ;
-	    	  System.out.println("Value of objective function: " + solver.getObjective());
-	      	double[] var = solver.getPtrVariables();		     
-	      	for (int i = 0; i < var.length; i++) {
-	      		System.out.println("Value of var[" + solver.getColName(i+1) + "] = " + var[i]);
-	      	}
-	      	System.out.println("*****************************************************************************");
-	      }
-
-	      // delete the problem and free memory
-	      solver.deleteLp();
-		
-	}
+//	public static void main(String[] args) throws LpSolveException, IOException{		
+//		Parameters.report.writeln("Creating LP Model\n. . .");
+//		
+//		String prefix = "lpmodel";
+//	    String suffix = ".tmp";
+//	    
+//	    File tempFile = File.createTempFile(prefix, suffix);
+//	    tempFile.deleteOnExit();
+//	    
+//	    FileWriter writer = new FileWriter(tempFile);
+//	    
+//		StringBuilder st = new StringBuilder();
+//		
+//		st.append("min: +x0 +x1 +x2 +x3 ;\n");
+//		
+//
+//		
+//		int constraintNumber=1;
+//		
+//		//amount of path constraint
+//		st.append("r_" + constraintNumber + ": 1 <= +x0 +x1 +x2 +x3 ;\n"); constraintNumber++;
+//		st.append("\n" + "bin x0, x1, x2, x3 ;");
+//		
+//		System.out.println(st.toString());
+//	    String stringLpModel = st.toString(); 
+//	    writer.append(stringLpModel);
+//	    
+//		Parameters.report.writeln("The LP model has been created: ");
+//		Parameters.report.writeln(stringLpModel);
+//	    
+//	    writer.flush();
+//	    writer.close();
+//
+//		Parameters.report.writeln("Solving Lp Model\n. . .");
+//
+//	    
+//	    //Solve lp model	
+//    	LpSolve solver = LpSolve.readLp("/home/nando/Desktop/a.lp",1,"");
+////    	solver.strSetObjFn("0.1");
+////    	int solverResult = solver.solve();
+////    	System.out.println("Solver Result= " + solverResult ) ;
+//
+////    	solverResult = solver.solve();
+////    	System.out.println("Solver Result= " + solverResult ) ;
+////    	
+////    	solverResult = solver.solve();
+////    	System.out.println("Solver Result= " + solverResult ) ;
+//	      	      
+//
+//	      
+//	      Parameters.report.writeln("The Lp model was solved: ");
+//	      // print solution
+//	      for(int j=0; j<10; j++){
+//	    	  System.out.println("***************************** Solution " + j +" *****************************");
+//	    	  int solverResult = solver.solve();
+//	    	  System.out.println("Solver Result= " + solverResult ) ;
+//	    	  System.out.println("Value of objective function: " + solver.getObjective());
+//	      	double[] var = solver.getPtrVariables();		     
+//	      	for (int i = 0; i < var.length; i++) {
+//	      		System.out.println("Value of var[" + solver.getColName(i+1) + "] = " + var[i]);
+//	      	}
+//	      	System.out.println("*****************************************************************************");
+//	      }
+//
+//	      // delete the problem and free memory
+//	      solver.deleteLp();
+//		
+//	}
 	
 	private int sharedEdges(GraphPath<Vertex,Edge> pi, GraphPath<Vertex,Edge> pj){
 		int amountSharedEdges=0;
@@ -690,4 +694,9 @@ public class DTNLpModel{
 //		       e.printStackTrace();
 //		    }
 //	  }
+	
+	public static void main(String args[]){
+		System.out.println(5 % -2);
+		System.out.println(5 / -2);
+	}
 }
