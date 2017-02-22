@@ -49,7 +49,7 @@ public class TestAvailability {
 	public void test3(){
         ListenableDirectedWeightedGraph<Vertex, Edge> graph;
 		try {
-			graph = XMLGraphParser.parseXMLGraph("/home/nando/development/Doctorado/Ej1/src/test/test_availability/data/g1.graphml");
+			graph = XMLGraphParser.parseDirectedXMLGraph("/home/nando/development/Doctorado/Ej1/src/test/test_availability/data/g1.graphml");
 	        Vertex source = getNode(graph,"n0");
 	        Vertex target = getNode(graph,"n2");
 			WNMetrics dummyObject = new WNMetrics();
@@ -68,7 +68,7 @@ public class TestAvailability {
 	public void test4(){
         ListenableDirectedWeightedGraph<Vertex, Edge> graph;
 		try {
-			graph = XMLGraphParser.parseXMLGraph("/home/nando/development/Doctorado/Ej1/src/test/test_availability/data/g3.graphml");
+			graph = XMLGraphParser.parseDirectedXMLGraph("/home/nando/development/Doctorado/Ej1/src/test/test_availability/data/g3.graphml");
 	        Vertex source = getNode(graph,"n0");
 	        Vertex target = getNode(graph,"n3");
 			WNMetrics dummyObject = new WNMetrics();
@@ -87,7 +87,7 @@ public class TestAvailability {
 	public void test5(){
         ListenableDirectedWeightedGraph<Vertex, Edge> graph;
 		try {
-			graph = XMLGraphParser.parseXMLGraph("/home/nando/development/Doctorado/Ej1/src/test/test_availability/data/g4.graphml");
+			graph = XMLGraphParser.parseDirectedXMLGraph("/home/nando/development/Doctorado/Ej1/src/test/test_availability/data/g4.graphml");
 	        Vertex source = getNode(graph,"n0");
 	        Vertex target = getNode(graph,"n3");
 			WNMetrics dummyObject = new WNMetrics();
@@ -106,7 +106,7 @@ public class TestAvailability {
 	public void test6(){
         ListenableDirectedWeightedGraph<Vertex, Edge> graph;
 		try {
-			graph = XMLGraphParser.parseXMLGraph("/home/nando/development/Doctorado/Ej1/src/test/test_availability/data/g5.graphml");
+			graph = XMLGraphParser.parseDirectedXMLGraph("/home/nando/development/Doctorado/Ej1/src/test/test_availability/data/g5.graphml");
 	        Vertex source = getNode(graph,"n0");
 	        Vertex target = getNode(graph,"n3");
 			WNMetrics dummyObject = new WNMetrics();
@@ -125,7 +125,7 @@ public class TestAvailability {
 	public void test7(){
         ListenableDirectedWeightedGraph<Vertex, Edge> graph;
 		try {
-			graph = XMLGraphParser.parseXMLGraph("/home/nando/development/Doctorado/Ej1/src/test/test_availability/data/g14.graphml");
+			graph = XMLGraphParser.parseDirectedXMLGraph("/home/nando/development/Doctorado/Ej1/src/test/test_availability/data/g14.graphml");
 	        Vertex source = getNode(graph,"n0");
 	        Vertex target = getNode(graph,"n2");
 	        if(source==null || target==null )
@@ -133,6 +133,27 @@ public class TestAvailability {
 			WNMetrics dummyObject = new WNMetrics();
 	        Double res =  dummyObject.computeAvailability(graph,source,target);
 	        assertEquals("Error in availability metric computation for src/test/test_availability/data/g14.graphml",0.9903567548,res,0.01);
+		} catch (ParserConfigurationException e) {
+			fail("Parser Configuration error: " + e.toString());
+		} catch (SAXException e) {
+			fail("Data parsing error: " + e.toString());
+		} catch (IOException e) {
+			fail("IO error: " + e.toString());
+		}
+	}
+	
+	@Test
+	public void test8(){
+        ListenableDirectedWeightedGraph<Vertex, Edge> graph;
+		try {
+			graph = XMLGraphParser.parseDirectedXMLGraph("/home/nando/development/Doctorado/Ej1/src/test/test_availability/data/prueba.graphml");
+	        Vertex source = getNode(graph,"n00");
+	        Vertex target = getNode(graph,"n22");
+	        if(source==null || target==null )
+	        	fail("Source or target node equal to null");
+			WNMetrics dummyObject = new WNMetrics();
+	        Double res =  dummyObject.computeAvailability(graph,source,target);
+	        assertEquals("Error in availability metric computation for src/test/test_availability/data/prueba.graphml",0.5,res,0.00);
 		} catch (ParserConfigurationException e) {
 			fail("Parser Configuration error: " + e.toString());
 		} catch (SAXException e) {

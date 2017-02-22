@@ -40,5 +40,18 @@ public class ExprVar extends Expr {
 	public String toString(){
 		return this.name;
 	}
+	
+	public boolean equals(Object object){
+		if(object instanceof ExprVar)
+			return ((ExprVar)object).name.equals(this.name);
+		else return false;
+	}
+	
+	@Override
+	public int hashCode(){
+	    StringBuffer buffer = new StringBuffer();
+	    buffer.append(this.name);
+	    return buffer.toString().hashCode();
+	}
 
 }

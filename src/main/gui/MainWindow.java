@@ -35,7 +35,7 @@ import main.util.XMLGraphParser.XMLGraphParser;
 
 public class MainWindow {
 
-	private Controller controller;
+	private ControllerFather controller;
 	private JGraphAdapterDemo  rightUpGraph,rightDownGraph;
 	protected JFrame frame;
 	private NewSampleWindow sampleWindow;
@@ -74,7 +74,7 @@ public class MainWindow {
 	 * @param resultGraph 
 	 * @param graph 
 	 */
-	public MainWindow(Controller ctr, ListenableDirectedWeightedGraph<Vertex, Edge> graph, ListenableDirectedWeightedGraph<Vertex, Edge> resultGraph) {
+	public MainWindow(ControllerFather ctr, ListenableDirectedWeightedGraph<Vertex, Edge> graph, ListenableDirectedWeightedGraph<Vertex, Edge> resultGraph) {
 		controller = ctr;
 		initialize(graph,resultGraph);
 		frame.setVisible(true);
@@ -417,7 +417,7 @@ public class MainWindow {
 			    loadAndSetModelWindow.setVisible(false);
 			}else{
 					//generate graph
-					ListenableDirectedWeightedGraph<Vertex, Edge> graph = XMLGraphParser.parseXMLGraph(f);
+					ListenableDirectedWeightedGraph<Vertex, Edge> graph = XMLGraphParser.parseDirectedXMLGraph(path);
 					switch(selectedIndex){
 						case 0:
 					

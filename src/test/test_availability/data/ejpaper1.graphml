@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"  
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns
+     http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+		 
+  <key id="mttr" for="edge" attr.name="mttr" attr.type="float"/>
+	<key id="mttf" for="edge" attr.name="mttf" attr.type="float"/>
+	<key id="a" for="edge" attr.name="a" attr.type="float"/>
+	<key id="groups" for="edge" attr.name="groups" attr.type="string"/>
+	<key id="delay" for="edge" attr.name="delay" attr.type="float"/>
+	<key id="group_params" for="graph" attr.name="group_params" attr.type="string"/>
+						 
+  <graph id="G1" edgedefault="undirected">
+		
+    <node id="n00"/>
+    <node id="n01"/>
+    <node id="n02"/>
+    <node id="n03"/>
+    <node id="n04"/>
+
+    <node id="n10"/>
+    <node id="n11"/>
+    <node id="n12"/>
+    <node id="n13"/>
+    <node id="n14"/>
+
+    <node id="n20"/>
+    <node id="n21"/>
+    <node id="n22"/>
+    <node id="n23"/>
+    <node id="n24"/>
+
+    <node id="n30"/>
+    <node id="n31"/>
+    <node id="n32"/>
+    <node id="n33"/>
+    <node id="n34"/>
+
+    <node id="T"/>
+
+		
+    <edge id="A" source="n00" target="n01">
+			<data key="a">1</data>
+	</edge>
+
+    <edge id="B" source="n01" target="n02">
+			<data key="a">1</data>
+	</edge>
+
+    <edge id="C" source="n02" target="n03">
+			<data key="a">1</data>
+	</edge>
+
+
+    <edge id="D" source="n10" target="n11">
+			<data key="a">1</data>
+	</edge>
+
+    <edge id="E" source="n11" target="n12">
+			<data key="a">1</data>
+	</edge>
+
+    <edge id="F" source="n12" target="n13">
+			<data key="a">1</data>
+	</edge>
+
+
+    <edge id="G" source="n20" target="n21">
+			<data key="a">1</data>
+	</edge>
+
+    <edge id="H" source="n21" target="n22">
+			<data key="a">1</data>
+	</edge>
+
+    <edge id="I" source="n22" target="n23">
+			<data key="a">1</data>
+	</edge>
+
+    <edge id="J" source="n30" target="n31">
+			<data key="a">1</data>
+	</edge>
+
+    <edge id="K" source="n31" target="n32">
+			<data key="a">1</data>
+	</edge>
+
+    <edge id="L" source="n32" target="n33">
+			<data key="a">1</data>
+	</edge>
+
+
+
+
+    <edge id="W" source="n00" target="n04">
+			<data key="a">1</data>
+	</edge>
+
+    <edge id="X" source="n11" target="n14">
+			<data key="a">1</data>
+	</edge>
+
+    <edge id="Y" source="n22" target="n24">
+			<data key="a">1</data>
+	</edge>
+
+    <edge id="Z" source="n33" target="n34">
+			<data key="a">1</data>
+	</edge>
+
+
+
+   <edge id="O" source="n04" target="T">
+			<data key="a">1</data>
+	</edge>
+
+    <edge id="O" source="n14" target="T">
+			<data key="a">1</data>
+	</edge>
+
+    <edge id="O" source="n24" target="T">
+			<data key="a">1</data>
+	</edge>
+
+    <edge id="O" source="n34" target="T">
+			<data key="a">1</data>
+	</edge>
+
+
+
+    <edge id="n00" source="n10" target="n04">
+			<data key="a">1</data>
+	</edge>
+
+    <edge id="n10" source="n11" target="n04">
+			<data key="a">1</data>
+	</edge>
+
+    <edge id="n00" source="n10" target="n04">
+			<data key="a">1</data>
+	</edge>
+
+    <edge id="n00" source="n10" target="n04">
+			<data key="a">1</data>
+	</edge>
+
+
+
+  </graph>
+</graphml>

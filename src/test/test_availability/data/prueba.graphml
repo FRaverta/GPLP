@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"  
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns
+     http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+		 
+  <key id="mttr" for="edge" attr.name="mttr" attr.type="float"/>
+	<key id="mttf" for="edge" attr.name="mttf" attr.type="float"/>
+	<key id="a" for="edge" attr.name="a" attr.type="float"/>
+	<key id="groups" for="edge" attr.name="groups" attr.type="string"/>
+	<key id="delay" for="edge" attr.name="delay" attr.type="float"/>
+	<key id="group_params" for="graph" attr.name="group_params" attr.type="string"/>
+						 
+  <graph id="G1" edgedefault="directed">
+		
+    <node id="n00"/>
+    <node id="n01"/>
+    <node id="n02"/>
+    <node id="n10"/>
+    <node id="n11"/>
+    <node id="n22"/>
+		
+    <edge id="e0" source="n00" target="n01">
+			<data key="a">1</data>
+	</edge>
+	    <edge id="e1" source="n01" target="n02">
+			<data key="a">1</data>
+	</edge>    
+	<edge id="e2" source="n00" target="n10">
+			<data key="a">0.5</data>
+	</edge>    
+ 	<edge id="e3" source="n11" target="n01">
+			<data key="a">0.5</data>
+	</edge>  
+	 <edge id="e4" source="n02" target="n22">
+			<data key="a">0.5</data>
+	</edge>    
+		<edge id="e5" source="n10" target="n11">
+			<data key="a">1</data>
+	</edge>  
+
+
+  </graph>
+</graphml>

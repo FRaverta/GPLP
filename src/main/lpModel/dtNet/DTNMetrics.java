@@ -177,37 +177,81 @@ public class DTNMetrics extends Metrics {
 		return DTNLpModel.getAllSinglePath(g, source, target);
 	}
 	
-public static void main(String args[]){
-//	DTNMetrics m = new DTNMetrics();
-////	Expr e = m.genFlowAvailableConfigurationExpr(Parameters.E4_GRAPH,Parameters.E4_Vertexs[0],Parameters.E4_Vertexs[Parameters.E4_Vertexs.length -1],2);
+//public static void main(String args[]){
+////	DTNMetrics m = new DTNMetrics();
+//////	Expr e = m.genFlowAvailableConfigurationExpr(Parameters.E4_GRAPH,Parameters.E4_Vertexs[0],Parameters.E4_Vertexs[Parameters.E4_Vertexs.length -1],2);
+//////	System.out.println(e.toString());
+////	
+////	ExprVar A = new ExprVar("A",0.4);
+////	ExprVar B = new ExprVar("B",0.3);
+////	ExprVar C = new ExprVar("C",0.5);
+////	ExprVar D = new ExprVar("D",0.2);
+////	ExprVar E = new ExprVar("E",0.6);
+////	
+////	List<Expr> d1 = new LinkedList<Expr>();
+////	d1.add(A);d1.add(B);d1.add(C);d1.add(D);
+////	
+////	List<Expr> d2 = new LinkedList<Expr>();
+////	d2.add(A);d2.add(B); d2.add(E); d2.add(C);d2.add(D);d2.add(E);
+////
+////	LinkedList<Expr> disyungendos = new LinkedList<Expr>();
+////	disyungendos.add(new ExprAnd(d1));disyungendos.add(new ExprAnd(d2));
+////	
+////	Expr e = new ExprOr(disyungendos);
 ////	System.out.println(e.toString());
-//	
-//	ExprVar A = new ExprVar("A",0.4);
-//	ExprVar B = new ExprVar("B",0.3);
-//	ExprVar C = new ExprVar("C",0.5);
-//	ExprVar D = new ExprVar("D",0.2);
-//	ExprVar E = new ExprVar("E",0.6);
-//	
-//	List<Expr> d1 = new LinkedList<Expr>();
-//	d1.add(A);d1.add(B);d1.add(C);d1.add(D);
-//	
-//	List<Expr> d2 = new LinkedList<Expr>();
-//	d2.add(A);d2.add(B); d2.add(E); d2.add(C);d2.add(D);d2.add(E);
-//
-//	LinkedList<Expr> disyungendos = new LinkedList<Expr>();
-//	disyungendos.add(new ExprAnd(d1));disyungendos.add(new ExprAnd(d2));
-//	
-//	Expr e = new ExprOr(disyungendos);
-//	System.out.println(e.toString());
-//	double a = m.H(e);
-//	System.out.println(a);
-	char[] s= {'A','B','C','D','E'};
-	LinkedList l = new LinkedList();
-	for(char c: s)
-		l.add(c);
-	l=getCombination(l);
-	System.out.println(l.toString() + l.size() );
+////	double a = m.H(e);
+////	System.out.println(a);
+//	char[] s= {'A','B','C','D','E'};
+//	LinkedList l = new LinkedList();
+//	for(char c: s)
+//		l.add(c);
+//	l=getCombination(l);
+//	System.out.println(l.toString() + l.size() );
+//}
+
+public static void main(String args[]){
+	//variables
+	ExprVar AB = new ExprVar("AB",0.5);
+	ExprVar AC = new ExprVar("AC",0.5);	
+	ExprVar ACc = new ExprVar("ACc",0.5);
+	ExprVar CB = new ExprVar("CB",0.5);
+	ExprVar BD = new ExprVar("BD",0.5);
+	ExprVar BDc = new ExprVar("BDc",0.5);
+	ExprVar BD2 = new ExprVar("BD2",0.5);
+	
+	LinkedList<Expr> aux= new LinkedList<Expr>();
+
+	//BDc * BD2
+	aux.add(BDc);aux.add(BD2);  
+	Expr e1 = new ExprAnd(aux);
+	
+	//BD + BDc * BD2
+	aux= new LinkedList<Expr>();
+	aux.add(BD); aux.add(e1);
+	Expr e2 = new ExprOr(aux);
+	
+	//CB*(BD + BDc * BD2)
+	aux= new LinkedList<Expr>();
+	aux.add(CB); aux.add(e2);
+	Expr e3 = new ExprAnd(aux);
+	
+	//AC*CB*(BD + BDc * BD2)
+	aux= new LinkedList<Expr>();
+	aux.add(AC); aux.add(e3);
+	Expr leftOrExpr= new ExprAnd(aux);
+	
+	//ACc * AB * BD2
+	aux= new LinkedList<Expr>();
+	aux.add(ACc); aux.add(AB);aux.add(BD2);
+	Expr rigthOrExpr= new ExprAnd(aux);
+	
+	aux= new LinkedList<Expr>();
+	aux.add(leftOrExpr);aux.add(rigthOrExpr);
+	Expr expr = new ExprOr(aux);
+	
+	System.out.println(H(expr));
 }
+
 
 
 }

@@ -9,7 +9,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.ListenableDirectedWeightedGraph;
+import org.jgrapht.graph.ListenableUndirectedWeightedGraph;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -19,6 +21,7 @@ import main.util.Vertex;
 //issue-> check unique identifier 
 public class XMLGraphParser extends DefaultHandler {
 
+	private static Object WeightedGraph;
 	private LinkedList<Edge> edges;
 	private LinkedList<Vertex> vertexs;
 	
@@ -30,12 +33,15 @@ public class XMLGraphParser extends DefaultHandler {
 	private boolean parsing_edge;
 	private boolean parsing_node;
 	private boolean parsing_data;
+	private boolean parsing_graph;
 	private boolean next_is_mttf;
 	private boolean next_is_mttr;
 	private boolean next_is_a;
 	private boolean next_is_weight;
 	private boolean next_is_capacity;
 	private String element_id;
+	//true if current graph is directed, false in cc
+	private boolean directed; 
 //	private String type_of_edge;
 	private String edge_source;
 	private String edge_target;
@@ -70,8 +76,12 @@ public class XMLGraphParser extends DefaultHandler {
 	
 	public void startElement(String s, String s1, String elementName, Attributes attributes) throws SAXException {
 //		type_of_edge = attributes.getValue("edgedefault");
-		
-		
+		if(elementName.equalsIgnoreCase("graph")){
+			parsing_graph = true;
+			try{
+				directed = (attributes.getValue("edgedefault").equals("directed")? true: false);
+			}catch(NullPointerException e){throw new SAXException("Graph declaration must have a field 'edgedefault' \n");}			
+		}
 		if(elementName.equalsIgnoreCase("node")){
 			parsing_node = true;
 			element_id = attributes.getValue("id");
@@ -114,6 +124,7 @@ public class XMLGraphParser extends DefaultHandler {
 	}
 	
 	public void endElement(String s, String s1, String element) throws SAXException{
+
 		if(parsing_node){
 			Vertex v = new Vertex(element_id);
 			vertexs.add(v);
@@ -126,8 +137,18 @@ public class XMLGraphParser extends DefaultHandler {
 			if(a >= 0){
 				Vertex source = searchSourceVertex(edge_source);
 				Vertex target = searchTargetVertex(edge_target);
-				Edge e = new Edge(element_id, source, target, weight, capacity, a);
+				Edge e = new Edge(element_id, source, target , weight, capacity, a);
 				edges.add(e);
+				/**
+				 * TODO: for this moment we parse undirected graph as directed. 
+				 * Which for each edge (s,t) we created a symetric edge (t,s) with
+				 * the same name, availability and weight. 
+				 */
+				if(!this.directed){
+					Edge eSymetric =  new Edge(element_id, target, source, weight, capacity, a);
+					edges.add(eSymetric);
+				}
+					
 			}else if(mttr > 0 && mttf > 0){
 				Vertex source = searchSourceVertex(edge_source);
 				Vertex target = searchTargetVertex(edge_target);
@@ -221,15 +242,17 @@ public class XMLGraphParser extends DefaultHandler {
 			</edge>)*
 		</graph>
 	 * */
-	public static ListenableDirectedWeightedGraph<Vertex, Edge> parseXMLGraph(File f) throws ParserConfigurationException, SAXException, IOException{
+	public static org.jgrapht.WeightedGraph<Vertex, Edge> parseXMLGraph(File f) throws ParserConfigurationException, SAXException, IOException{
         XMLGraphParser handler = new XMLGraphParser();
 		// parse
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser parser = factory.newSAXParser();
         parser.parse(f, handler);
         
-		ListenableDirectedWeightedGraph<Vertex, Edge> graph = new ListenableDirectedWeightedGraph<Vertex,Edge>(Edge.class);
-		
+        //TODO: for this moment we parse undirected graph as directed graph.
+//        org.jgrapht.WeightedGraph<Vertex, Edge> graph = (handler.directed)?new ListenableDirectedWeightedGraph<Vertex,Edge>(Edge.class)
+//        																   :new ListenableUndirectedWeightedGraph<Vertex,Edge>(Edge.class);
+        org.jgrapht.WeightedGraph<Vertex, Edge> graph = new DefaultDirectedWeightedGraph<Vertex,Edge>(Edge.class);
 		for(Vertex v: handler.vertexs)
 			graph.addVertex(v);
 		
@@ -256,14 +279,35 @@ public class XMLGraphParser extends DefaultHandler {
 			</edge>)*
 		</graph>
 	 * */
-	public static ListenableDirectedWeightedGraph<Vertex, Edge> parseXMLGraph(String path) throws ParserConfigurationException, SAXException, IOException{
+	public static ListenableDirectedWeightedGraph<Vertex, Edge> parseDirectedXMLGraph(String path) throws ParserConfigurationException, SAXException, IOException{
         File f = new File(path);
-        ListenableDirectedWeightedGraph<Vertex, Edge> result =  parseXMLGraph(f);
+        ListenableDirectedWeightedGraph<Vertex, Edge> result =  new  ListenableDirectedWeightedGraph<Vertex, Edge>(parseXMLGraph(f));
+		return result;
+	}
+	
+	/**
+	 * Parse graph from a XML document in graphml format. 
+	 * Current implementation ignore field 'key' declaration and it always return directed graph.
+	 * The format expected could be expresed as the follow:
+	 * 
+	 *  <graph id="id_graph">
+	 *  	(<node id="id_node"/>)*
+	 *  	 (<edge id="e0" source="n0" target="n1">
+			  	(<data key="mttf">float value</data>)?
+				(<data key="mttr">float value</data>)?
+				(<data key="a">float value</data>)?
+			</edge>)*
+		</graph>
+	 * */
+	@Deprecated //For this moment it parses undirected graph as directed graph. 
+	public static ListenableUndirectedWeightedGraph<Vertex, Edge> parseUnDirectedXMLGraph(String path) throws ParserConfigurationException, SAXException, IOException{
+        File f = new File(path);
+        ListenableUndirectedWeightedGraph<Vertex, Edge> result =  new ListenableUndirectedWeightedGraph<Vertex, Edge>(parseXMLGraph(f));
 		return result;
 	}
 	
 	public static void main(String args[]) throws ParserConfigurationException, SAXException, IOException{
-		ListenableDirectedWeightedGraph<Vertex, Edge> graph = XMLGraphParser.parseXMLGraph("/home/nando/development/Doctorado/Ej1/src/test_availability/data/g13.graphml");
+		ListenableDirectedWeightedGraph<Vertex, Edge> graph = XMLGraphParser.parseDirectedXMLGraph("/home/nando/development/Doctorado/Ej1/src/test_availability/data/g13.graphml");
 		System.out.println(graph.toString());
 	}
 	

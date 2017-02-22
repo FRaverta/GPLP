@@ -128,7 +128,7 @@ public abstract class Metrics {
 		return H(e);		
 	}
 	
-	public double H(Expr e){
+	public static double H(Expr e){
 		e = e.reduce();
 		if(e instanceof ExprConstant)
 			return (((ExprConstant)e).value)?1:0;

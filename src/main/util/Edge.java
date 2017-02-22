@@ -45,4 +45,17 @@ public class Edge extends DefaultWeightedEdge {
 	public String toString(){
 		return "["+name + ",f:" + from + ",t:" + to + ",w:" + weight+",a:" + availability + "]";
 	}
+	
+	//********************************************************************************
+	//TODO-> delete from here 
+	
+	public boolean isInterNodeLink(){
+		int fromindex_ = from.name.indexOf('_'); 
+		int toindex_ = to.name.indexOf('_');
+		if(fromindex_>=0 && toindex_>=0 && this.from.name.substring(0, fromindex_).equals(to.name.substring(0,toindex_)))
+			return false;
+		return true;
+	}
+	
+	public int varIndex;
 }

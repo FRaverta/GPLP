@@ -10,6 +10,15 @@ public class Vertex {
 	public String toString(){
 		return name;
 	}
+//	
+//	public boolean equals(Object obj){
+//		System.out.println("LPM");
+//		if(!(obj instanceof Vertex))
+//			return false;
+//		else
+//			return name.equals(((Vertex) obj).name);
+//		
+//	}
 
 	
 
