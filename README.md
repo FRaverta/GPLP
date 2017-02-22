@@ -1,7 +1,7 @@
 # GPLP
 
 Program for optimize paths availabilities and their cost in graphs. For this it create and solve linnear programming models.
-For run you need to have LPSolve C-library and its Java's language interface driver. 
+For run you need to have LPSolve C-library and its Java's language interface wrapper. 
 
 LPSolve library installation Linux
 Add to /home/USER/.bashrc the follow lines:
